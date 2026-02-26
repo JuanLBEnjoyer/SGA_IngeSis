@@ -1,13 +1,21 @@
 package co.edu.uniquindio.proyecto.domain.valueobject;
 
+import co.edu.uniquindio.proyecto.domain.exception.ExcepcionDeReglaDeDominio;
+
 public record Email(String valor) {
 
     public Email {
         if (valor == null || valor.isBlank()) {
-            throw new IllegalArgumentException("El email no puede ser nulo o vacío");
+            throw new ExcepcionDeReglaDeDominio("El email no puede ser nulo o vacío");
         }
         if (!valor.contains("@")) {
-            throw new IllegalArgumentException("El email no tiene el formato correcto");
+            throw new ExcepcionDeReglaDeDominio("El email no tiene el formato correcto");
+        }
+        if (!valor.contains("uniquindio.edu.co")){
+            throw new ExcepcionDeReglaDeDominio("El email no pertenece a la institucion");
+        }
+        if (!valor.contains("uqvirtual.edu.co")){
+            throw new ExcepcionDeReglaDeDominio("El email no pertenece a la institucion");
         }
     }
 
