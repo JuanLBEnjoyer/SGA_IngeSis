@@ -1,5 +1,8 @@
 package co.edu.uniquindio.proyecto.domain.entity;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import co.edu.uniquindio.proyecto.domain.exception.ExcepcionDeReglaDeDominio;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
 import lombok.Getter;
@@ -14,6 +17,7 @@ public class Solicitud {
     private EstadoDeSolicitud estado;
     private PrioridadDeSolicitud prioridad;
     private Documento documentoResponsable;
+    private final List<RegistroHistorial> historial = new ArrayList<>();
 
     public Solicitud(CodigoSolicitud codigo, String descripcion, Documento documentoSolicitante, TipoDeSolicitud tipo) {
         this.codigo = codigo;
@@ -23,10 +27,11 @@ public class Solicitud {
         this.descripcion = descripcion;
         this.documentoSolicitante = documentoSolicitante;
         if (tipo == null) {
-            throw new ExcepcionDeReglaDeDominio("El tipo de la solicitud no puede estar vacio");
+            throw new ExcepcionDeReglaDeDominio("El tipo de solicitud no puede estar vacio");
         }
         this.tipo = tipo;
         this.estado = EstadoDeSolicitud.REGISTRADA;
+        this.historial.add(new RegistroHistorial("Solicitud registrada", LocalDateTime.now(), this.estado));
     }
 
     public void clasificarSolicitud(PrioridadDeSolicitud prioridad) {
@@ -35,6 +40,7 @@ public class Solicitud {
         }
         this.prioridad = prioridad;
         this.estado = EstadoDeSolicitud.CLASIFICADA;
+        this.historial.add(new RegistroHistorial("Solicitud clasificada", LocalDateTime.now(), this.estado));
     }
 
     public void asignarResponsable(Documento documentoResponsable) {
@@ -50,6 +56,7 @@ public class Solicitud {
             throw new ExcepcionDeReglaDeDominio("Solo se puede atender una solicitud en atencion");
         }
         this.estado = EstadoDeSolicitud.ATENDIDA;
+        this.historial.add(new RegistroHistorial("Solicitud atendida", LocalDateTime.now(), this.estado));
     }
 
     public void cerrar() {
@@ -57,6 +64,7 @@ public class Solicitud {
             throw new ExcepcionDeReglaDeDominio("Solo se puede cerrar una solicitud atendida");
         }
         this.estado = EstadoDeSolicitud.CERRADA;
+        this.historial.add(new RegistroHistorial("Solicitud cerrada", LocalDateTime.now(), this.estado));
     }
 
 }
