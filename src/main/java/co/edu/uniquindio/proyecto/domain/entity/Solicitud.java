@@ -2,7 +2,9 @@ package co.edu.uniquindio.proyecto.domain.entity;
 
 import co.edu.uniquindio.proyecto.domain.exception.ExcepcionDeReglaDeDominio;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
+import lombok.Getter;
 
+@Getter
 public class Solicitud {
 
     private final CodigoSolicitud codigo;
@@ -21,34 +23,6 @@ public class Solicitud {
         this.descripcion = descripcion;
         this.idSolicitante = idSolicitante;
         this.estado = EstadoDeSolicitud.REGISTRADA;
-    }
-
-    public CodigoSolicitud getCodigo() {
-        return codigo;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public String getIdSolicitante() {
-        return idSolicitante;
-    }
-
-    public TipoDeSolicitud getTipo() {
-        return tipo;
-    }
-
-    public EstadoDeSolicitud getEstado() {
-        return estado;
-    }
-
-    public PrioridadDeSolicitud getPrioridad() {
-        return prioridad;
-    }
-
-    public String getIdResponsable() {
-        return idResponsable;
     }
 
     public void clasificarSolicitud(TipoDeSolicitud tipo, PrioridadDeSolicitud prioridad) {

@@ -1,7 +1,9 @@
 package co.edu.uniquindio.proyecto.domain.entity;
 
 import co.edu.uniquindio.proyecto.domain.valueobject.Email;
+import lombok.Getter;
 
+@Getter
 public class Usuario {
 
     private String id;
@@ -13,17 +15,4 @@ public class Usuario {
         this.nombre = nombre;
         this.email = email;
     }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public Email getEmail() {
-        return email;
-    }
-
 }
