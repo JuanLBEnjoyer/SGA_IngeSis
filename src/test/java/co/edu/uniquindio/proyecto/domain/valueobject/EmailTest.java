@@ -51,7 +51,7 @@ public class EmailTest {
     }
 
     @Test
-    void debeCrearEmailInstitcional3() {
+    void noDebePermitirDominioNoInstitucional() {
         String email = "usuario@gmail.com";
         Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
                 () -> new Email(email));
@@ -59,7 +59,7 @@ public class EmailTest {
     }
 
     @Test
-    void debeCrearEmailInstitcional4() {
+    void noDebePermitirDominioNoInstitucional2() {
         String email = "usuario@hotmail.com";
         Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
                 () -> new Email(email));
@@ -67,7 +67,7 @@ public class EmailTest {
     }
 
     @Test
-    void debeCrearEmailInstitcional5() {
+    void noDebePermitirDominioNoInstitucional3() {
         String email = "usuario@uniquindio.com";
         Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
                 () -> new Email(email));
@@ -75,7 +75,7 @@ public class EmailTest {
     }
 
     @Test
-    void debeCrearEmailInstitcional6() {
+    void noDebePermitirDominioNoInstitucional4() {
         String email = "usuario@uqvirtual.com";
         Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
                 () -> new Email(email));
