@@ -20,20 +20,10 @@ public class UsuarioTest {
                 documento,
                 "Daniel Garcia",
                 email,
-                RolUsuario.ESTUDIANTE
-        );
+                RolUsuario.ESTUDIANTE);
         assertNotNull(usuario);
     }
-    @Test
-    void debeCrearUsuarioConRolResponsable() {
-        Usuario usuario = new Usuario(
-                documento,
-                "Daniel Garcia",
-                email,
-                RolUsuario.ESTUDIANTE
-        );
-        assertNotNull(usuario);
-    }
+
     @Test
     void debePermitirCrearMultiplesUsuariosConDatosDiferentes() {
         Documento documento2 = new Documento("789456", TipoDeDocumento.CEDULA);
@@ -42,16 +32,15 @@ public class UsuarioTest {
                 documento,
                 "Daniel Garcia",
                 email,
-                RolUsuario.ESTUDIANTE
-        );
+                RolUsuario.ESTUDIANTE);
         Usuario usuario2 = new Usuario(
                 documento2,
                 "Maria Lopez",
                 email2,
-                RolUsuario.ESTUDIANTE
-        );
+                RolUsuario.ESTUDIANTE);
         assertNotEquals(usuario1, usuario2);
     }
+
     @Test
     void noDebeCrearUsuarioConDocumentoNulo() {
         Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
@@ -62,6 +51,7 @@ public class UsuarioTest {
                         RolUsuario.ESTUDIANTE));
         assertEquals("El documento no puede ser nulo", ex.getMessage());
     }
+
     @Test
     void noDebeCrearUsuarioConNombreVacio() {
         Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
@@ -72,6 +62,7 @@ public class UsuarioTest {
                         RolUsuario.ESTUDIANTE));
         assertEquals("El nombre no puede estar vacio", ex.getMessage());
     }
+
     @Test
     void noDebeCrearUsuarioConEmailNulo() {
         Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
@@ -82,6 +73,7 @@ public class UsuarioTest {
                         RolUsuario.ESTUDIANTE));
         assertEquals("El email no puede ser nulo", ex.getMessage());
     }
+
     @Test
     void noDebeCrearUsuarioConRolNulo() {
         Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
