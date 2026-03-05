@@ -82,5 +82,86 @@ public class SolicitudTest {
                 () -> solicitud.clasificar(PrioridadDeSolicitud.MEDIO));
         assertEquals("Solo se puede clasificar una solicitud registrada", ex.getMessage());
     }
-    
+    @Test
+    void debeAsignarResponsableASolicitudClasificada() {
+        Documento responsable = new Documento("789456", TipoDeDocumento.CEDULA);
+        Solicitud solicitud = new Solicitud(
+                codigo,
+                "Registro de materias",
+                solicitante,
+                TipoDeSolicitud.REGISTRAR_ASIGNATURA
+        );
+        solicitud.clasificar(PrioridadDeSolicitud.MEDIO);
+        solicitud.asignarResponsable(responsable);
+        assertEquals(EstadoDeSolicitud.EN_ATENCION, solicitud.getEstado());
+        assertEquals(responsable, solicitud.getDocumentoResponsable());
+    }
+    @Test
+    void noDebeAsignarResponsableSiNoEstaClasificada() {
+        Documento responsable = new Documento("789456", TipoDeDocumento.CEDULA);
+        Solicitud solicitud = new Solicitud(
+                codigo,
+                "Registro de materias",
+                solicitante,
+                TipoDeSolicitud.REGISTRAR_ASIGNATURA
+        );
+        Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
+                () -> solicitud.asignarResponsable(responsable));
+        assertEquals("Solo se puede asignar un responsable a una solicitud clasificada", ex.getMessage());
+    }
+    @Test
+    void debeAtenderSolicitudEnAtencion() {
+        Documento responsable = new Documento("789456", TipoDeDocumento.CEDULA);
+        Solicitud solicitud = new Solicitud(
+                codigo,
+                "Registro de materias",
+                solicitante,
+                TipoDeSolicitud.REGISTRAR_ASIGNATURA
+        );
+        solicitud.clasificar(PrioridadDeSolicitud.MEDIO);
+        solicitud.asignarResponsable(responsable);
+        solicitud.atender();
+        assertEquals(EstadoDeSolicitud.ATENDIDA, solicitud.getEstado());
+        assertEquals(4, solicitud.getHistorial().size());
+    }
+    @Test
+    void noDebeAtenderSolicitudQueNoEsteEnAtencion() {
+        Solicitud solicitud = new Solicitud(
+                codigo,
+                "Registro de materias",
+                solicitante,
+                TipoDeSolicitud.REGISTRAR_ASIGNATURA
+        );
+        Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
+                solicitud::atender);
+        assertEquals("Solo se puede atender una solicitud en atencion", ex.getMessage());
+    }
+    @Test
+    void debeCerrarSolicitudAtendida() {
+        Documento responsable = new Documento("789456", TipoDeDocumento.CEDULA);
+        Solicitud solicitud = new Solicitud(
+                codigo,
+                "Registro de materias",
+                solicitante,
+                TipoDeSolicitud.REGISTRAR_ASIGNATURA
+        );
+        solicitud.clasificar(PrioridadDeSolicitud.MEDIO);
+        solicitud.asignarResponsable(responsable);
+        solicitud.atender();
+        solicitud.cerrar();
+        assertEquals(EstadoDeSolicitud.CERRADA, solicitud.getEstado());
+        assertEquals(5, solicitud.getHistorial().size());
+    }
+    @Test
+    void noDebeCerrarSolicitudSiNoEstaAtendida() {
+        Solicitud solicitud = new Solicitud(
+                codigo,
+                "Registro de materias",
+                solicitante,
+                TipoDeSolicitud.REGISTRAR_ASIGNATURA
+        );
+        Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
+                solicitud::cerrar);
+        assertEquals("Solo se puede cerrar una solicitud atendida", ex.getMessage());
+    }
 }
