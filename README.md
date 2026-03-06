@@ -1,2 +1,2 @@
-Juan Pablo Galeano Correa
-Daniel Estiven Garcia Jaramillo
+1. Juan Pablo Galeano Correa
+2. Daniel Estiven Garcia Jaramillo
