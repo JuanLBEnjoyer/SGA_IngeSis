@@ -20,11 +20,17 @@ public class Solicitud {
     private final List<RegistroHistorial> historial = new ArrayList<>();
 
     public Solicitud(CodigoSolicitud codigo, String descripcion, Documento documentoSolicitante, TipoDeSolicitud tipo) {
+        if (codigo == null) {
+            throw new ExcepcionDeReglaDeDominio("El codigo no puede ser nulo");
+        }
         this.codigo = codigo;
         if (descripcion == null || descripcion.isBlank()) {
             throw new ExcepcionDeReglaDeDominio("La descripcion no puede estar vacia");
         }
         this.descripcion = descripcion;
+        if (documentoSolicitante == null) {
+            throw new ExcepcionDeReglaDeDominio("El documento del solicitante no puede estar vacio");
+        }
         this.documentoSolicitante = documentoSolicitante;
         if (tipo == null) {
             throw new ExcepcionDeReglaDeDominio("El tipo de solicitud no puede estar vacio");

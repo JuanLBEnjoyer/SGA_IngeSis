@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.domain.application;
+package co.edu.uniquindio.proyecto.application;
 
 public class App {
     public static void main(String[] args) {
