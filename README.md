@@ -1,7 +1,7 @@
 # Proyecto
 
 ## Descripción
-Sistema para la gestión de solicitudes académicas de la Universidad del Quindío.
+Sistema para la gestión de solicitudes académicas del Programa de Ingenieria de Sistemas y Computacion
 
 > **Nota:** Este proyecto se encuentra actualmente en fase de desarrollo y sufrirá diferentes cambios a lo largo del curso de Programación Avanzada.
 
