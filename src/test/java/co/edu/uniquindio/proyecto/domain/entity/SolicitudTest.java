@@ -9,7 +9,8 @@ public class SolicitudTest {
 
         private final CodigoSolicitud codigo = new CodigoSolicitud("001");
         private final Documento documento = new Documento("123456", TipoDeDocumento.CEDULA);
-        private final Usuario solicitante = new Usuario(documento, "Juan Perez", new Email("juan.perez@uqvirtual.edu.co"), RolUsuario.ESTUDIANTE);
+        private final Usuario solicitante = new Usuario(documento, "Juan Perez",
+                        new Email("juan.perez@uqvirtual.edu.co"), RolUsuario.ESTUDIANTE);
 
         @Test
         void debeCrearSolicitudValida() {
@@ -58,100 +59,98 @@ public class SolicitudTest {
         }
 
         @Test
-    void noDebeCrearSolicitudConSolicitanteNulo() {
-        Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
-                () -> new Solicitud(
-                        codigo,
-                        "Registro de materias",
-                        null,
-                        TipoDeSolicitud.REGISTRAR_ASIGNATURA
-                ));
-        assertEquals("El solicitante no puede estar vacio", ex.getMessage());
-    }
-    @Test
-    void debeClasificarSolicitudRegistrada() {
-        Solicitud solicitud = new Solicitud(
-                codigo,
-                "Registro de materias",
-                solicitante,
-                TipoDeSolicitud.REGISTRAR_ASIGNATURA
-        );
-        solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
-        assertEquals(EstadoDeSolicitud.CLASIFICADA, solicitud.getEstado());
-        assertEquals(PrioridadDeSolicitud.MEDIO, solicitud.getPrioridad());
-        assertEquals(2, solicitud.getHistorial().size());
-    }
-    @Test
-    void noDebeClasificarSolicitudConJustificacionVacia() {
-        Solicitud solicitud = new Solicitud(
-                codigo,
-                "Registro de materias",
-                solicitante,
-                TipoDeSolicitud.REGISTRAR_ASIGNATURA
-        );
-        Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
-                () -> solicitud.clasificar(PrioridadDeSolicitud.MEDIO, ""));
-        assertEquals("La justificacion no puede estar vacia", ex.getMessage());
-    }
+        void noDebeCrearSolicitudConSolicitanteNulo() {
+                Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
+                                () -> new Solicitud(
+                                                codigo,
+                                                "Registro de materias",
+                                                null,
+                                                TipoDeSolicitud.REGISTRAR_ASIGNATURA));
+                assertEquals("El solicitante no puede estar vacio", ex.getMessage());
+        }
 
         @Test
-    void noDebeClasificarSolicitudQueNoEsteRegistrada() {
-        Solicitud solicitud = new Solicitud(
-                codigo,
-                "Registro de materias",
-                solicitante,
-                TipoDeSolicitud.REGISTRAR_ASIGNATURA
-        );
-        solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
-        Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
-                () -> solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo"));
-        assertEquals("Solo se puede clasificar una solicitud registrada", ex.getMessage());
-    }
+        void debeClasificarSolicitudRegistrada() {
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                assertEquals(EstadoDeSolicitud.CLASIFICADA, solicitud.getEstado());
+                assertEquals(PrioridadDeSolicitud.MEDIO, solicitud.getPrioridad());
+                assertEquals(2, solicitud.getHistorial().size());
+        }
 
         @Test
-    void debeAsignarResponsableASolicitudClasificada() {
-        Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez", new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
-        Solicitud solicitud = new Solicitud(
-                codigo,
-                "Registro de materias",
-                solicitante,
-                TipoDeSolicitud.REGISTRAR_ASIGNATURA
-        );
-        solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
-        solicitud.asignarResponsable(responsable);
-        assertEquals(EstadoDeSolicitud.EN_ATENCION, solicitud.getEstado());
-        assertEquals(responsable, solicitud.getResponsable());
-    }
+        void noDebeClasificarSolicitudConJustificacionVacia() {
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
+                                () -> solicitud.clasificar(PrioridadDeSolicitud.MEDIO, ""));
+                assertEquals("La justificacion no puede estar vacia", ex.getMessage());
+        }
 
         @Test
-    void noDebeAsignarResponsableSiNoEstaClasificada() {
-        Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez", new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
-        Solicitud solicitud = new Solicitud(
-                codigo,
-                "Registro de materias",
-                solicitante,
-                TipoDeSolicitud.REGISTRAR_ASIGNATURA
-        );
-        Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
-                () -> solicitud.asignarResponsable(responsable));
-        assertEquals("Solo se puede asignar un responsable a una solicitud clasificada", ex.getMessage());
-    }
+        void noDebeClasificarSolicitudQueNoEsteRegistrada() {
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
+                                () -> solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo"));
+                assertEquals("Solo se puede clasificar una solicitud registrada", ex.getMessage());
+        }
 
         @Test
-    void debeAtenderSolicitudEnAtencion() {
-        Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez", new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
-        Solicitud solicitud = new Solicitud(
-                codigo,
-                "Registro de materias",
-                solicitante,
-                TipoDeSolicitud.REGISTRAR_ASIGNATURA
-        );
-        solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
-        solicitud.asignarResponsable(responsable);
-        solicitud.atender();
-        assertEquals(EstadoDeSolicitud.ATENDIDA, solicitud.getEstado());
-        assertEquals(4, solicitud.getHistorial().size());
-    }
+        void debeAsignarResponsableASolicitudClasificada() {
+                Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez",
+                                new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                solicitud.asignarResponsable(responsable);
+                assertEquals(EstadoDeSolicitud.EN_ATENCION, solicitud.getEstado());
+                assertEquals(responsable, solicitud.getResponsable());
+        }
+
+        @Test
+        void noDebeAsignarResponsableSiNoEstaClasificada() {
+                Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez",
+                                new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
+                                () -> solicitud.asignarResponsable(responsable));
+                assertEquals("Solo se puede asignar un responsable a una solicitud clasificada", ex.getMessage());
+        }
+
+        @Test
+        void debeAtenderSolicitudEnAtencion() {
+                Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez",
+                                new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                solicitud.asignarResponsable(responsable);
+                solicitud.atender();
+                assertEquals(EstadoDeSolicitud.ATENDIDA, solicitud.getEstado());
+                assertEquals(4, solicitud.getHistorial().size());
+        }
 
         @Test
         void noDebeAtenderSolicitudQueNoEsteEnAtencion() {
@@ -166,21 +165,21 @@ public class SolicitudTest {
         }
 
         @Test
-    void debeCerrarSolicitudAtendida() {
-        Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez", new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
-        Solicitud solicitud = new Solicitud(
-                codigo,
-                "Registro de materias",
-                solicitante,
-                TipoDeSolicitud.REGISTRAR_ASIGNATURA
-        );
-        solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
-        solicitud.asignarResponsable(responsable);
-        solicitud.atender();
-        solicitud.cerrar();
-        assertEquals(EstadoDeSolicitud.CERRADA, solicitud.getEstado());
-        assertEquals(5, solicitud.getHistorial().size());
-    }
+        void debeCerrarSolicitudAtendida() {
+                Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez",
+                                new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                solicitud.asignarResponsable(responsable);
+                solicitud.atender();
+                solicitud.cerrar("Solicitud cerrada");
+                assertEquals(EstadoDeSolicitud.CERRADA, solicitud.getEstado());
+                assertEquals(5, solicitud.getHistorial().size());
+        }
 
         @Test
         void noDebeCerrarSolicitudSiNoEstaAtendida() {
@@ -190,7 +189,7 @@ public class SolicitudTest {
                                 solicitante,
                                 TipoDeSolicitud.REGISTRAR_ASIGNATURA);
                 Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
-                                solicitud::cerrar);
+                                () -> solicitud.cerrar("Solicitud cerrada"));
                 assertEquals("Solo se puede cerrar una solicitud atendida", ex.getMessage());
         }
 }

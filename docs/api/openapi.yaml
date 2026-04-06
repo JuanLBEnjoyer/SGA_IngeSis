@@ -1,0 +1,528 @@
+openapi: 3.1.0
+
+info:
+  title: API Sistema de Gestión de Solicitudes Académicas
+  description: |
+    API RESTful para la gestión de solicitudes académicas del
+    Programa de Ingeniería de Sistemas y Computación - Universidad del Quindío.
+
+    **Dominio principal:** Gestión de Solicitudes Académicas
+    **Agregado principal:** Solicitud
+
+    ## Ciclo de vida de una Solicitud
+    ```
+    REGISTRADA → CLASIFICADA → EN_ATENCION → ATENDIDA → CERRADA
+    ```
+    Cada transición corresponde a una operación del dominio expuesta como endpoint.
+
+  version: 1.0.0
+  contact:
+    name: Programa de Ingeniería de Sistemas
+    email: sistemas@uniquindio.edu.co
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo local
+
+tags:
+  - name: Solicitudes
+    description: Gestión del ciclo de vida completo de una solicitud académica
+
+# ==============================================================
+# PATHS
+# ==============================================================
+paths:
+
+  /api/solicitudes:
+    post:
+      tags:
+        - Solicitudes
+      summary: Registrar una nueva solicitud
+      description: |
+        Crea una nueva solicitud en estado **REGISTRADA**.
+        Mapea a la operación del dominio: `CrearSolicitudUseCase`
+        El código se genera automáticamente — no debe enviarse en el body.
+      operationId: crearSolicitud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrearSolicitudRequest'
+            example:
+              tipo: REGISTRAR_ASIGNATURA
+              descripcion: "Necesito registrar la asignatura Programación Avanzada para este semestre"
+              documentoSolicitante: "1094123456"
+      responses:
+        '201':
+          description: Solicitud registrada exitosamente
+          headers:
+            Location:
+              description: URL de la solicitud creada
+              schema:
+                type: string
+                example: /api/solicitudes/001
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitante no encontrado
+
+    get:
+      tags:
+        - Solicitudes
+      summary: Listar solicitudes
+      description: |
+        Obtiene la lista de solicitudes. Se puede filtrar por estado.
+        Mapea a: `ConsultarSolicitudesPorEstadoUseCase`
+      operationId: listarSolicitudes
+      parameters:
+        - name: estado
+          in: query
+          description: Filtrar por estado de la solicitud
+          required: false
+          schema:
+            $ref: '#/components/schemas/EstadoDeSolicitud'
+      responses:
+        '200':
+          description: Lista de solicitudes obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SolicitudResumenResponse'
+
+  /api/solicitudes/{codigo}:
+    get:
+      tags:
+        - Solicitudes
+      summary: Obtener detalle de una solicitud
+      description: Retorna la información completa de una solicitud por su código.
+      operationId: obtenerSolicitud
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          description: Código único de la solicitud (ej. 001, 042)
+          schema:
+            type: string
+            example: "001"
+      responses:
+        '200':
+          description: Solicitud encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '404':
+          description: Solicitud no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/solicitudes/{codigo}/clasificar:
+    put:
+      tags:
+        - Solicitudes
+      summary: Clasificar una solicitud
+      description: |
+        Asigna una prioridad a la solicitud y la pasa a estado **CLASIFICADA**.
+        Mapea a: `CambiarEstadoUseCase.clasificar()`
+
+        **Precondiciones:**
+        - La solicitud debe estar en estado `REGISTRADA`
+      operationId: clasificarSolicitud
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClasificarSolicitudRequest'
+            example:
+              prioridad: ALTO
+              justificacion: "Inicio de semestre, estudiante requiere acceso urgente a la asignatura"
+      responses:
+        '200':
+          description: Solicitud clasificada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Estado inválido para clasificar (no está en REGISTRADA)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitud no encontrada
+
+  /api/solicitudes/{codigo}/asignar:
+    put:
+      tags:
+        - Solicitudes
+      summary: Asignar responsable a una solicitud
+      description: |
+        Designa un usuario como responsable de atender la solicitud.
+        La solicitud pasa a estado **EN_ATENCION**.
+        Mapea a: `AsignarResponsableUseCase`
+
+        **Precondiciones:**
+        - La solicitud debe estar en estado `CLASIFICADA`
+        - El responsable no puede tener rol `ESTUDIANTE`
+      operationId: asignarResponsable
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AsignarResponsableRequest'
+            example:
+              documentoResponsable: "987654321"
+      responses:
+        '200':
+          description: Responsable asignado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Estado inválido o responsable no válido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitud o responsable no encontrado
+
+  /api/solicitudes/{codigo}/atender:
+    patch:
+      tags:
+        - Solicitudes
+      summary: Marcar una solicitud como atendida
+      description: |
+        Registra que la solicitud fue atendida. Pasa a estado **ATENDIDA**.
+        Mapea a: `CambiarEstadoUseCase.atender()`
+
+        **Precondiciones:**
+        - La solicitud debe estar en estado `EN_ATENCION`
+      operationId: atenderSolicitud
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtenderSolicitudRequest'
+            example:
+              observacion: "Se realizó el registro de la asignatura exitosamente en el sistema"
+      responses:
+        '200':
+          description: Solicitud marcada como atendida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Estado inválido para atender
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitud no encontrada
+
+  /api/solicitudes/{codigo}/cerrar:
+    put:
+      tags:
+        - Solicitudes
+      summary: Cerrar una solicitud
+      description: |
+        Finaliza el ciclo de vida de la solicitud. Pasa a estado **CERRADA** (estado final).
+        Mapea a: `CerrarSolicitudUseCase`
+
+        **Precondiciones:**
+        - La solicitud debe estar en estado `ATENDIDA`
+      operationId: cerrarSolicitud
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CerrarSolicitudRequest'
+            example:
+              observacion: "Solicitud resuelta satisfactoriamente. Estudiante notificado."
+      responses:
+        '200':
+          description: Solicitud cerrada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Estado inválido para cerrar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitud no encontrada
+
+  /api/solicitudes/{codigo}/historial:
+    get:
+      tags:
+        - Solicitudes
+      summary: Obtener historial de una solicitud
+      description: |
+        Retorna todos los registros del historial de la solicitud en orden cronológico.
+        Accede directamente al historial del agregado `Solicitud`.
+      operationId: obtenerHistorial
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Historial obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegistroHistorialResponse'
+        '404':
+          description: Solicitud no encontrada
+
+# ==============================================================
+# COMPONENTS
+# ==============================================================
+components:
+  schemas:
+
+    # ---- Request DTOs ----------------------------------------
+
+    CrearSolicitudRequest:
+      type: object
+      required:
+        - tipo
+        - descripcion
+        - documentoSolicitante
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoDeSolicitud'
+        descripcion:
+          type: string
+          minLength: 10
+          maxLength: 500
+          description: Descripción detallada de la solicitud
+        documentoSolicitante:
+          type: string
+          description: Número de documento del usuario que realiza la solicitud
+
+    ClasificarSolicitudRequest:
+      type: object
+      required:
+        - prioridad
+        - justificacion
+      properties:
+        prioridad:
+          $ref: '#/components/schemas/PrioridadDeSolicitud'
+        justificacion:
+          type: string
+          minLength: 10
+          maxLength: 500
+
+    AsignarResponsableRequest:
+      type: object
+      required:
+        - documentoResponsable
+      properties:
+        documentoResponsable:
+          type: string
+          description: Número de documento del usuario responsable (no puede ser ESTUDIANTE)
+
+    AtenderSolicitudRequest:
+      type: object
+      required:
+        - observacion
+      properties:
+        observacion:
+          type: string
+          maxLength: 500
+
+    CerrarSolicitudRequest:
+      type: object
+      required:
+        - observacion
+      properties:
+        observacion:
+          type: string
+          maxLength: 500
+
+    # ---- Response DTOs ----------------------------------------
+
+    SolicitudDetalleResponse:
+      type: object
+      properties:
+        codigo:
+          type: string
+          example: "001"
+        tipo:
+          $ref: '#/components/schemas/TipoDeSolicitud'
+        descripcion:
+          type: string
+        estado:
+          $ref: '#/components/schemas/EstadoDeSolicitud'
+        prioridad:
+          $ref: '#/components/schemas/PrioridadDeSolicitud'
+          nullable: true
+        solicitante:
+          $ref: '#/components/schemas/UsuarioResumenResponse'
+        responsable:
+          $ref: '#/components/schemas/UsuarioResumenResponse'
+          nullable: true
+        fechaCreacion:
+          type: string
+          format: date-time
+        totalRegistrosHistorial:
+          type: integer
+
+    SolicitudResumenResponse:
+      type: object
+      properties:
+        codigo:
+          type: string
+        tipo:
+          $ref: '#/components/schemas/TipoDeSolicitud'
+        descripcionBreve:
+          type: string
+          description: Primeros 100 caracteres de la descripción
+        estado:
+          $ref: '#/components/schemas/EstadoDeSolicitud'
+        prioridad:
+          $ref: '#/components/schemas/PrioridadDeSolicitud'
+          nullable: true
+        nombreSolicitante:
+          type: string
+        nombreResponsable:
+          type: string
+          nullable: true
+        fechaCreacion:
+          type: string
+          format: date-time
+
+    RegistroHistorialResponse:
+      type: object
+      properties:
+        descripcion:
+          type: string
+        fecha:
+          type: string
+          format: date-time
+        estadoAsociado:
+          $ref: '#/components/schemas/EstadoDeSolicitud'
+
+    UsuarioResumenResponse:
+      type: object
+      properties:
+        numeroDocumento:
+          type: string
+        tipoDocumento:
+          type: string
+        nombre:
+          type: string
+        email:
+          type: string
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
+
+    # ---- Enumeraciones ----------------------------------------
+
+    TipoDeSolicitud:
+      type: string
+      enum:
+        - REGISTRAR_ASIGNATURA
+        - HOMOLOGACION
+        - CANCELACION_ASIGNATURA
+        - SOLICITUD_CUPO
+        - CONSULTA_ACADEMICA
+
+    EstadoDeSolicitud:
+      type: string
+      enum:
+        - REGISTRADA
+        - CLASIFICADA
+        - EN_ATENCION
+        - ATENDIDA
+        - CERRADA
+
+    PrioridadDeSolicitud:
+      type: string
+      enum:
+        - BAJO
+        - MEDIO
+        - ALTO
+        - URGENTE
+
+    RolUsuario:
+      type: string
+      enum:
+        - ESTUDIANTE
+        - DOCENTE
+        - ADMINISTRATIVO
+        - DIRECTIVO
+
+    # ---- Error Response ----------------------------------------
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "Bad Request"
+        mensaje:
+          type: string
+          example: "La descripción es obligatoria"
+        path:
+          type: string
+          example: "/api/solicitudes"

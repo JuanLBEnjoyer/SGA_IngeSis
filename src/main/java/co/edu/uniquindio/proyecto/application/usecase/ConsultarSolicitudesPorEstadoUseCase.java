@@ -5,14 +5,12 @@ import co.edu.uniquindio.proyecto.domain.repository.*;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class ConsultarSolicitudesPorEstadoUseCase {
 
     private final SolicitudRepository solicitudRepository;
-
-    public ConsultarSolicitudesPorEstadoUseCase(SolicitudRepository solicitudRepository) {
-        this.solicitudRepository = solicitudRepository;
-    }
 
     public List<Solicitud> ejecutar(EstadoDeSolicitud estado) {
         return solicitudRepository.obtenerPorEstado(estado);

@@ -6,6 +6,7 @@ import co.edu.uniquindio.proyecto.domain.entity.Usuario;
 import co.edu.uniquindio.proyecto.domain.repository.GeneradorCodigo;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.repository.UsuarioRepository;
+import co.edu.uniquindio.proyecto.domain.service.AsignarResponsableService;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
 import co.edu.uniquindio.proyecto.infrastructure.repository.SolicitudRepositoryEnMemoria;
 import co.edu.uniquindio.proyecto.infrastructure.repository.UsuarioRepositoryEnMemoria;
@@ -21,11 +22,12 @@ public class Main {
                 SolicitudRepository solicitudRepo = new SolicitudRepositoryEnMemoria();
                 UsuarioRepository usuarioRepo = new UsuarioRepositoryEnMemoria();
                 GeneradorCodigo generadorCodigo = new GeneradorCodigoSecuencial();
+                AsignarResponsableService asignarResponsableService = new AsignarResponsableService();
 
                 // --- Casos de uso ---
                 CrearSolicitudUseCase crearSolicitud = new CrearSolicitudUseCase(solicitudRepo, generadorCodigo);
                 AsignarResponsableUseCase asignarResponsable = new AsignarResponsableUseCase(solicitudRepo,
-                                usuarioRepo);
+                                usuarioRepo, asignarResponsableService);
                 CambiarEstadoUseCase cambiarEstado = new CambiarEstadoUseCase(solicitudRepo);
                 CerrarSolicitudUseCase cerrarSolicitud = new CerrarSolicitudUseCase(solicitudRepo);
                 ConsultarSolicitudesPorEstadoUseCase consultarPorEstado = new ConsultarSolicitudesPorEstadoUseCase(
@@ -73,7 +75,7 @@ public class Main {
                 System.out.println("Solicitud atendida | Estado: " + solicitud.getEstado());
 
                 // 5. Cerrar
-                cerrarSolicitud.ejecutar(solicitud.getCodigo());
+                cerrarSolicitud.ejecutar(solicitud.getCodigo(), "Solicitud cerrada");
                 System.out.println("Solicitud cerrada | Estado: " + solicitud.getEstado());
 
                 // 6. Crear una segunda solicitud y consultar por estado

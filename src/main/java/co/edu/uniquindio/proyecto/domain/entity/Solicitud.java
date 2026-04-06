@@ -70,12 +70,13 @@ public class Solicitud {
         this.historial.add(new RegistroHistorial("Solicitud atendida", LocalDateTime.now(), this.estado));
     }
 
-    public void cerrar() {
+    public void cerrar(String justificacion) {
         if (this.estado != EstadoDeSolicitud.ATENDIDA) {
             throw new ExcepcionDeReglaDeDominio("Solo se puede cerrar una solicitud atendida");
         }
         this.estado = EstadoDeSolicitud.CERRADA;
-        this.historial.add(new RegistroHistorial("Solicitud cerrada", LocalDateTime.now(), this.estado));
+        this.historial
+                .add(new RegistroHistorial("Solicitud cerrada" + justificacion, LocalDateTime.now(), this.estado));
     }
 
 }
