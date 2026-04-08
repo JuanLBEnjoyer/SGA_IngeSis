@@ -15,6 +15,15 @@ info:
     ```
     Cada transición corresponde a una operación del dominio expuesta como endpoint.
 
+    ## Autenticación
+    Todos los endpoints requieren un token JWT en el header `Authorization`.
+    Formato: `Bearer <token>`
+
+    Los roles disponibles y sus permisos son:
+    - **ESTUDIANTE** → puede crear solicitudes y consultar las propias
+    - **DOCENTE / ADMINISTRATIVO** → puede clasificar, asignar y atender
+    - **DIRECTIVO** → acceso completo, incluyendo cerrar solicitudes
+
   version: 1.0.0
   contact:
     name: Programa de Ingeniería de Sistemas
@@ -27,6 +36,15 @@ servers:
 tags:
   - name: Solicitudes
     description: Gestión del ciclo de vida completo de una solicitud académica
+
+# ==============================================================
+# SEGURIDAD GLOBAL
+# Aplica bearerAuth a todos los endpoints por defecto.
+# Si un endpoint no requiere autenticación se puede sobreescribir
+# con security: [] en ese endpoint específico.
+# ==============================================================
+security:
+  - bearerAuth: []
 
 # ==============================================================
 # PATHS
@@ -42,6 +60,8 @@ paths:
         Crea una nueva solicitud en estado **REGISTRADA**.
         Mapea a la operación del dominio: `CrearSolicitudUseCase`
         El código se genera automáticamente — no debe enviarse en el body.
+
+        **Roles permitidos:** ESTUDIANTE, DOCENTE, ADMINISTRATIVO, DIRECTIVO
       operationId: crearSolicitud
       requestBody:
         required: true
@@ -72,8 +92,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 400
+                error: "Bad Request"
+                mensaje: "La descripción debe tener entre 10 y 500 caracteres"
+                path: "/api/solicitudes"
+        '401':
+          description: No autenticado — token ausente o inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 401
+                error: "Unauthorized"
+                mensaje: "Token JWT ausente o expirado"
+                path: "/api/solicitudes"
+        '403':
+          description: Sin permisos para realizar esta operación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 403
+                error: "Forbidden"
+                mensaje: "No tiene permisos para crear solicitudes"
+                path: "/api/solicitudes"
         '404':
           description: Solicitante no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 404
+                error: "Not Found"
+                mensaje: "No se encontró un usuario con el documento: 1094123456"
+                path: "/api/solicitudes"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 500
+                error: "Internal Server Error"
+                mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
+                path: "/api/solicitudes"
 
     get:
       tags:
@@ -82,6 +154,8 @@ paths:
       description: |
         Obtiene la lista de solicitudes. Se puede filtrar por estado.
         Mapea a: `ConsultarSolicitudesPorEstadoUseCase`
+
+        **Roles permitidos:** DOCENTE, ADMINISTRATIVO, DIRECTIVO
       operationId: listarSolicitudes
       parameters:
         - name: estado
@@ -99,13 +173,52 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SolicitudResumenResponse'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 401
+                error: "Unauthorized"
+                mensaje: "Token JWT ausente o expirado"
+                path: "/api/solicitudes"
+        '403':
+          description: Sin permisos para listar solicitudes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 403
+                error: "Forbidden"
+                mensaje: "El rol ESTUDIANTE no puede listar todas las solicitudes"
+                path: "/api/solicitudes"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 500
+                error: "Internal Server Error"
+                mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
+                path: "/api/solicitudes"
 
   /api/solicitudes/{codigo}:
     get:
       tags:
         - Solicitudes
       summary: Obtener detalle de una solicitud
-      description: Retorna la información completa de una solicitud por su código.
+      description: |
+        Retorna la información completa de una solicitud por su código.
+
+        **Roles permitidos:** ESTUDIANTE (solo las propias), DOCENTE, ADMINISTRATIVO, DIRECTIVO
       operationId: obtenerSolicitud
       parameters:
         - name: codigo
@@ -122,12 +235,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 401
+                error: "Unauthorized"
+                mensaje: "Token JWT ausente o expirado"
+                path: "/api/solicitudes/001"
+        '403':
+          description: Sin permisos para ver esta solicitud
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 403
+                error: "Forbidden"
+                mensaje: "No tiene permisos para consultar esta solicitud"
+                path: "/api/solicitudes/001"
         '404':
           description: Solicitud no encontrada
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 404
+                error: "Not Found"
+                mensaje: "No se encontró una solicitud con el código: 001"
+                path: "/api/solicitudes/001"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 500
+                error: "Internal Server Error"
+                mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
+                path: "/api/solicitudes/001"
 
   /api/solicitudes/{codigo}/clasificar:
     put:
@@ -140,6 +295,8 @@ paths:
 
         **Precondiciones:**
         - La solicitud debe estar en estado `REGISTRADA`
+
+        **Roles permitidos:** DOCENTE, ADMINISTRATIVO, DIRECTIVO
       operationId: clasificarSolicitud
       parameters:
         - name: codigo
@@ -164,13 +321,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/SolicitudDetalleResponse'
         '400':
-          description: Estado inválido para clasificar (no está en REGISTRADA)
+          description: Estado inválido para clasificar
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 400
+                error: "Bad Request"
+                mensaje: "Solo se puede clasificar una solicitud registrada"
+                path: "/api/solicitudes/001/clasificar"
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 401
+                error: "Unauthorized"
+                mensaje: "Token JWT ausente o expirado"
+                path: "/api/solicitudes/001/clasificar"
+        '403':
+          description: Sin permisos para clasificar solicitudes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 403
+                error: "Forbidden"
+                mensaje: "El rol ESTUDIANTE no puede clasificar solicitudes"
+                path: "/api/solicitudes/001/clasificar"
         '404':
           description: Solicitud no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 404
+                error: "Not Found"
+                mensaje: "No se encontró una solicitud con el código: 001"
+                path: "/api/solicitudes/001/clasificar"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 500
+                error: "Internal Server Error"
+                mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
+                path: "/api/solicitudes/001/clasificar"
 
   /api/solicitudes/{codigo}/asignar:
     put:
@@ -185,6 +394,8 @@ paths:
         **Precondiciones:**
         - La solicitud debe estar en estado `CLASIFICADA`
         - El responsable no puede tener rol `ESTUDIANTE`
+
+        **Roles permitidos:** ADMINISTRATIVO, DIRECTIVO
       operationId: asignarResponsable
       parameters:
         - name: codigo
@@ -213,8 +424,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 400
+                error: "Bad Request"
+                mensaje: "Un estudiante no puede ser responsable"
+                path: "/api/solicitudes/001/asignar"
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 401
+                error: "Unauthorized"
+                mensaje: "Token JWT ausente o expirado"
+                path: "/api/solicitudes/001/asignar"
+        '403':
+          description: Sin permisos para asignar responsables
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 403
+                error: "Forbidden"
+                mensaje: "Solo ADMINISTRATIVO o DIRECTIVO pueden asignar responsables"
+                path: "/api/solicitudes/001/asignar"
         '404':
           description: Solicitud o responsable no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 404
+                error: "Not Found"
+                mensaje: "No se encontró un usuario con el documento: 987654321"
+                path: "/api/solicitudes/001/asignar"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 500
+                error: "Internal Server Error"
+                mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
+                path: "/api/solicitudes/001/asignar"
 
   /api/solicitudes/{codigo}/atender:
     patch:
@@ -227,6 +490,8 @@ paths:
 
         **Precondiciones:**
         - La solicitud debe estar en estado `EN_ATENCION`
+
+        **Roles permitidos:** DOCENTE, ADMINISTRATIVO, DIRECTIVO
       operationId: atenderSolicitud
       parameters:
         - name: codigo
@@ -255,8 +520,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 400
+                error: "Bad Request"
+                mensaje: "Solo se puede atender una solicitud en atención"
+                path: "/api/solicitudes/001/atender"
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 401
+                error: "Unauthorized"
+                mensaje: "Token JWT ausente o expirado"
+                path: "/api/solicitudes/001/atender"
+        '403':
+          description: Sin permisos para atender solicitudes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 403
+                error: "Forbidden"
+                mensaje: "El rol ESTUDIANTE no puede atender solicitudes"
+                path: "/api/solicitudes/001/atender"
         '404':
           description: Solicitud no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 404
+                error: "Not Found"
+                mensaje: "No se encontró una solicitud con el código: 001"
+                path: "/api/solicitudes/001/atender"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 500
+                error: "Internal Server Error"
+                mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
+                path: "/api/solicitudes/001/atender"
 
   /api/solicitudes/{codigo}/cerrar:
     put:
@@ -269,6 +586,8 @@ paths:
 
         **Precondiciones:**
         - La solicitud debe estar en estado `ATENDIDA`
+
+        **Roles permitidos:** ADMINISTRATIVO, DIRECTIVO
       operationId: cerrarSolicitud
       parameters:
         - name: codigo
@@ -297,8 +616,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 400
+                error: "Bad Request"
+                mensaje: "Solo se puede cerrar una solicitud atendida"
+                path: "/api/solicitudes/001/cerrar"
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 401
+                error: "Unauthorized"
+                mensaje: "Token JWT ausente o expirado"
+                path: "/api/solicitudes/001/cerrar"
+        '403':
+          description: Sin permisos para cerrar solicitudes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 403
+                error: "Forbidden"
+                mensaje: "Solo ADMINISTRATIVO o DIRECTIVO pueden cerrar solicitudes"
+                path: "/api/solicitudes/001/cerrar"
         '404':
           description: Solicitud no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 404
+                error: "Not Found"
+                mensaje: "No se encontró una solicitud con el código: 001"
+                path: "/api/solicitudes/001/cerrar"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 500
+                error: "Internal Server Error"
+                mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
+                path: "/api/solicitudes/001/cerrar"
 
   /api/solicitudes/{codigo}/historial:
     get:
@@ -308,6 +679,8 @@ paths:
       description: |
         Retorna todos los registros del historial de la solicitud en orden cronológico.
         Accede directamente al historial del agregado `Solicitud`.
+
+        **Roles permitidos:** ESTUDIANTE (solo las propias), DOCENTE, ADMINISTRATIVO, DIRECTIVO
       operationId: obtenerHistorial
       parameters:
         - name: codigo
@@ -324,13 +697,74 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/RegistroHistorialResponse'
+        '401':
+          description: No autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 401
+                error: "Unauthorized"
+                mensaje: "Token JWT ausente o expirado"
+                path: "/api/solicitudes/001/historial"
+        '403':
+          description: Sin permisos para ver este historial
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 403
+                error: "Forbidden"
+                mensaje: "No tiene permisos para consultar el historial de esta solicitud"
+                path: "/api/solicitudes/001/historial"
         '404':
           description: Solicitud no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 404
+                error: "Not Found"
+                mensaje: "No se encontró una solicitud con el código: 001"
+                path: "/api/solicitudes/001/historial"
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 500
+                error: "Internal Server Error"
+                mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
+                path: "/api/solicitudes/001/historial"
 
 # ==============================================================
 # COMPONENTS
 # ==============================================================
 components:
+
+  # ------------------------------------------------------------
+  # ESQUEMA DE SEGURIDAD
+  # bearerAuth define que usamos JWT en el header Authorization.
+  # Se referencia globalmente arriba con security: [bearerAuth: []]
+  # ------------------------------------------------------------
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Token JWT obtenido al autenticarse en el sistema.
+        Incluirlo en cada petición como: `Authorization: Bearer <token>`
+
   schemas:
 
     # ---- Request DTOs ----------------------------------------
