@@ -6,19 +6,15 @@ import co.edu.uniquindio.proyecto.domain.valueobject.*;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class CambiarEstadoUseCase {
+public class ClasificarSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
 
-    public void clasificar(CodigoSolicitud codigo, PrioridadDeSolicitud prioridad, String justificacion) {
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigo);
+    public void ejecutar(String codigo, PrioridadDeSolicitud prioridad, String justificacion) {
+        CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
+        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
         solicitud.clasificar(prioridad, justificacion);
         solicitudRepository.guardar(solicitud);
     }
 
-    public void atender(CodigoSolicitud codigo) {
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigo);
-        solicitud.atender();
-        solicitudRepository.guardar(solicitud);
-    }
 }

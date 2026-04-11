@@ -37,18 +37,9 @@ tags:
   - name: Solicitudes
     description: Gestión del ciclo de vida completo de una solicitud académica
 
-# ==============================================================
-# SEGURIDAD GLOBAL
-# Aplica bearerAuth a todos los endpoints por defecto.
-# Si un endpoint no requiere autenticación se puede sobreescribir
-# con security: [] en ese endpoint específico.
-# ==============================================================
 security:
   - bearerAuth: []
 
-# ==============================================================
-# PATHS
-# ==============================================================
 paths:
 
   /api/solicitudes:
@@ -746,16 +737,8 @@ paths:
                 mensaje: "Ocurrió un error inesperado. Por favor intente más tarde."
                 path: "/api/solicitudes/001/historial"
 
-# ==============================================================
-# COMPONENTS
-# ==============================================================
 components:
 
-  # ------------------------------------------------------------
-  # ESQUEMA DE SEGURIDAD
-  # bearerAuth define que usamos JWT en el header Authorization.
-  # Se referencia globalmente arriba con security: [bearerAuth: []]
-  # ------------------------------------------------------------
   securitySchemes:
     bearerAuth:
       type: http
@@ -766,8 +749,6 @@ components:
         Incluirlo en cada petición como: `Authorization: Bearer <token>`
 
   schemas:
-
-    # ---- Request DTOs ----------------------------------------
 
     CrearSolicitudRequest:
       type: object
@@ -826,8 +807,6 @@ components:
         observacion:
           type: string
           maxLength: 500
-
-    # ---- Response DTOs ----------------------------------------
 
     SolicitudDetalleResponse:
       type: object
@@ -904,8 +883,6 @@ components:
         rol:
           $ref: '#/components/schemas/RolUsuario'
 
-    # ---- Enumeraciones ----------------------------------------
-
     TipoDeSolicitud:
       type: string
       enum:
@@ -939,8 +916,6 @@ components:
         - DOCENTE
         - ADMINISTRATIVO
         - DIRECTIVO
-
-    # ---- Error Response ----------------------------------------
 
     ErrorResponse:
       type: object

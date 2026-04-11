@@ -28,8 +28,9 @@ public class Main {
                 CrearSolicitudUseCase crearSolicitud = new CrearSolicitudUseCase(solicitudRepo, generadorCodigo);
                 AsignarResponsableUseCase asignarResponsable = new AsignarResponsableUseCase(solicitudRepo,
                                 usuarioRepo, asignarResponsableService);
-                CambiarEstadoUseCase cambiarEstado = new CambiarEstadoUseCase(solicitudRepo);
+                ClasificarSolicitudUseCase cambiarEstado = new ClasificarSolicitudUseCase(solicitudRepo);
                 CerrarSolicitudUseCase cerrarSolicitud = new CerrarSolicitudUseCase(solicitudRepo);
+                AtenderSolicitudUseCase atenderSolicitudUseCase = new AtenderSolicitudUseCase(solicitudRepo);
                 ConsultarSolicitudesPorEstadoUseCase consultarPorEstado = new ConsultarSolicitudesPorEstadoUseCase(
                                 solicitudRepo);
 
@@ -61,21 +62,22 @@ public class Main {
                                 "Solicitud creada: " + solicitud.getCodigo() + " | Estado: " + solicitud.getEstado());
 
                 // 2. Clasificar (cambiar estado)
-                cambiarEstado.clasificar(solicitud.getCodigo(), PrioridadDeSolicitud.ALTO, "Inicio de semestre");
+                cambiarEstado.ejecutar(solicitud.getCodigo().valor(), PrioridadDeSolicitud.ALTO, "Inicio de semestre");
                 System.out.println("Solicitud clasificada | Estado: " + solicitud.getEstado() + " | Prioridad: "
                                 + solicitud.getPrioridad());
 
                 // 3. Asignar responsable
-                asignarResponsable.ejecutar(solicitud.getCodigo(), docAdministrativo);
+                asignarResponsable.ejecutar(solicitud.getCodigo().valor(), docAdministrativo.numero(),
+                                docAdministrativo.tipo());
                 System.out.println("Responsable asignado: " + solicitud.getResponsable().getNombre() + " | Estado: "
                                 + solicitud.getEstado());
 
                 // 4. Atender
-                cambiarEstado.atender(solicitud.getCodigo());
+                atenderSolicitudUseCase.ejecutar(solicitud.getCodigo().valor());
                 System.out.println("Solicitud atendida | Estado: " + solicitud.getEstado());
 
                 // 5. Cerrar
-                cerrarSolicitud.ejecutar(solicitud.getCodigo(), "Solicitud cerrada");
+                cerrarSolicitud.ejecutar(solicitud.getCodigo().valor(), "Solicitud cerrada");
                 System.out.println("Solicitud cerrada | Estado: " + solicitud.getEstado());
 
                 // 6. Crear una segunda solicitud y consultar por estado

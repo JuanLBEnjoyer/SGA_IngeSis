@@ -10,8 +10,9 @@ public class CerrarSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
 
-    public void ejecutar(CodigoSolicitud codigo, String justificacion) {
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigo);
+    public void ejecutar(String codigo, String justificacion) {
+        CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
+        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
         solicitud.cerrar(justificacion);
         solicitudRepository.guardar(solicitud);
     }
