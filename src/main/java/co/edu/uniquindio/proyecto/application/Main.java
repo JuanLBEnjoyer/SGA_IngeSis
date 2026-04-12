@@ -25,7 +25,8 @@ public class Main {
                 AsignarResponsableService asignarResponsableService = new AsignarResponsableService();
 
                 // --- Casos de uso ---
-                CrearSolicitudUseCase crearSolicitud = new CrearSolicitudUseCase(solicitudRepo, generadorCodigo);
+                CrearSolicitudUseCase crearSolicitud = new CrearSolicitudUseCase(solicitudRepo, generadorCodigo,
+                                usuarioRepo);
                 AsignarResponsableUseCase asignarResponsable = new AsignarResponsableUseCase(solicitudRepo,
                                 usuarioRepo, asignarResponsableService);
                 ClasificarSolicitudUseCase cambiarEstado = new ClasificarSolicitudUseCase(solicitudRepo);
@@ -57,7 +58,8 @@ public class Main {
                 Solicitud solicitud = crearSolicitud.ejecutar(
                                 TipoDeSolicitud.REGISTRAR_ASIGNATURA,
                                 "Necesito registrar Programación Avanzada",
-                                estudiante);
+                                estudiante.getDocumento().numero(),
+                                estudiante.getDocumento().tipo());
                 System.out.println(
                                 "Solicitud creada: " + solicitud.getCodigo() + " | Estado: " + solicitud.getEstado());
 
@@ -84,7 +86,8 @@ public class Main {
                 crearSolicitud.ejecutar(
                                 TipoDeSolicitud.HOMOLOGACION,
                                 "Solicito homologación de Algoritmos",
-                                estudiante);
+                                estudiante.getDocumento().numero(),
+                                estudiante.getDocumento().tipo());
 
                 List<Solicitud> registradas = consultarPorEstado.ejecutar(EstadoDeSolicitud.REGISTRADA);
                 System.out.println("\nSolicitudes en estado REGISTRADA: " + registradas.size());
