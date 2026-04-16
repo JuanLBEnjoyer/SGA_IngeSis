@@ -5,9 +5,12 @@ import co.edu.uniquindio.proyecto.domain.exception.ExcepcionDeUsuarioNoEncontrad
 import co.edu.uniquindio.proyecto.domain.repository.UsuarioRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.Documento;
 
+import org.springframework.stereotype.Repository;
+
 import java.util.HashMap;
 import java.util.Map;
 
+@Repository
 public class UsuarioRepositoryEnMemoria implements UsuarioRepository {
 
     private final Map<Documento, Usuario> usuarios = new HashMap<>();

@@ -6,10 +6,13 @@ import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.CodigoSolicitud;
 import co.edu.uniquindio.proyecto.domain.valueobject.EstadoDeSolicitud;
 
+import org.springframework.stereotype.Repository;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Repository
 public class SolicitudRepositoryEnMemoria implements SolicitudRepository {
 
     private final Map<CodigoSolicitud, Solicitud> solicitudes = new HashMap<>();
