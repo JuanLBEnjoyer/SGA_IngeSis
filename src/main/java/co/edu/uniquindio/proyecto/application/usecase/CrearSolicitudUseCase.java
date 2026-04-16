@@ -1,11 +1,14 @@
 package co.edu.uniquindio.proyecto.application.usecase;
 
+import org.springframework.stereotype.Service;
 
 import co.edu.uniquindio.proyecto.domain.entity.*;
 import co.edu.uniquindio.proyecto.domain.repository.*;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+@Service
 @RequiredArgsConstructor
 public class CrearSolicitudUseCase {
 
@@ -13,6 +16,7 @@ public class CrearSolicitudUseCase {
     private final GeneradorCodigo generadorCodigo;
     private final UsuarioRepository usuarioRepository;
 
+    @Transactional
     public Solicitud ejecutar(TipoDeSolicitud tipo, String descripcion, String numeroDocumento,
             TipoDeDocumento tipoDocumento) {
 
