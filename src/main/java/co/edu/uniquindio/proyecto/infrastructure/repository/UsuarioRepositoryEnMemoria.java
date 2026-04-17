@@ -16,7 +16,7 @@ public class UsuarioRepositoryEnMemoria implements UsuarioRepository {
     private final Map<Documento, Usuario> usuarios = new HashMap<>();
 
     @Override
-    public Usuario obtenerPorDocumento(Documento documento) {
+    public Usuario findByDocumento(Documento documento) {
         Usuario usuario = usuarios.get(documento);
         if (usuario == null) {
             throw new ExcepcionDeUsuarioNoEncontrado(documento);
@@ -25,7 +25,7 @@ public class UsuarioRepositoryEnMemoria implements UsuarioRepository {
     }
 
     @Override
-    public void guardar(Usuario usuario) {
+    public void save(Usuario usuario) {
         usuarios.put(usuario.getDocumento(), usuario);
     }
 }

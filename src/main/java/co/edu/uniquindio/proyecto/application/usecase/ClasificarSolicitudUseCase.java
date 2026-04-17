@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import co.edu.uniquindio.proyecto.domain.entity.*;
 import co.edu.uniquindio.proyecto.domain.repository.*;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -17,9 +17,9 @@ public class ClasificarSolicitudUseCase {
     @Transactional
     public void ejecutar(String codigo, PrioridadDeSolicitud prioridad, String justificacion) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
+        Solicitud solicitud = solicitudRepository.findById(codigoSolicitud);
         solicitud.clasificar(prioridad, justificacion);
-        solicitudRepository.guardar(solicitud);
+        solicitudRepository.save(solicitud);
     }
 
 }

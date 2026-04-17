@@ -5,9 +5,9 @@ import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
 
 public interface SolicitudRepository {
-    Solicitud obtenerPorCodigo(CodigoSolicitud codigo);
+    Solicitud findById(CodigoSolicitud codigo);
 
-    void guardar(Solicitud solicitud);
+    void save(Solicitud solicitud);
 
-    List<Solicitud> obtenerPorEstado(EstadoDeSolicitud estado);
+    List<Solicitud> findByEstado(EstadoDeSolicitud estado);
 }

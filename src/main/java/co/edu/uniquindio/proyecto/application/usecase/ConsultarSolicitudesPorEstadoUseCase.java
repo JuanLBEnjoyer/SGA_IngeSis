@@ -3,7 +3,7 @@ package co.edu.uniquindio.proyecto.application.usecase;
 import co.edu.uniquindio.proyecto.domain.entity.*;
 import co.edu.uniquindio.proyecto.domain.repository.*;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ public class ConsultarSolicitudesPorEstadoUseCase {
 
     private final SolicitudRepository solicitudRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Solicitud> ejecutar(EstadoDeSolicitud estado) {
-        return solicitudRepository.obtenerPorEstado(estado);
+        return solicitudRepository.findByEstado(estado);
     }
 }

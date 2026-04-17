@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.CodigoSolicitud;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -17,8 +17,8 @@ public class AtenderSolicitudUseCase {
     @Transactional
     public void ejecutar(String codigo) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
+        Solicitud solicitud = solicitudRepository.findById(codigoSolicitud);
         solicitud.atender();
-        solicitudRepository.guardar(solicitud);
+        solicitudRepository.save(solicitud);
     }
 }

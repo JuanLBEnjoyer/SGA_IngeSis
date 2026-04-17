@@ -5,7 +5,7 @@ import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.CodigoSolicitud;
 
 import org.springframework.stereotype.Service;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,10 +15,10 @@ public class ObtenerSolicitudUseCase {
 
     private final SolicitudRepository solicitudRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Solicitud ejecutar(String codigo) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        return solicitudRepository.obtenerPorCodigo(codigoSolicitud);
+        return solicitudRepository.findById(codigoSolicitud);
     }
 
 }

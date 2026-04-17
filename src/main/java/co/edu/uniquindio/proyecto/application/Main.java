@@ -49,7 +49,7 @@ public class Main {
                                 "Daniel Garcia",
                                 new Email("daniel.garcia@uniquindio.edu.co"),
                                 RolUsuario.ADMINISTRATIVO);
-                usuarioRepo.guardar(administrativo);
+                usuarioRepo.save(administrativo);
 
                 // --- Flujo completo de una solicitud ---
                 System.out.println("=== PRUEBA DE CASOS DE USO ===\n");

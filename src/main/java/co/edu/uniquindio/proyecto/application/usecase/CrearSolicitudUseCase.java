@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import co.edu.uniquindio.proyecto.domain.entity.*;
 import co.edu.uniquindio.proyecto.domain.repository.*;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -21,12 +21,12 @@ public class CrearSolicitudUseCase {
             TipoDeDocumento tipoDocumento) {
 
         Documento docSolicitante = new Documento(numeroDocumento, tipoDocumento);
-        Usuario solicitante = usuarioRepository.obtenerPorDocumento(docSolicitante);
+        Usuario solicitante = usuarioRepository.findByDocumento(docSolicitante);
 
         CodigoSolicitud codigo = generadorCodigo.generar();
 
         Solicitud solicitud = new Solicitud(codigo, descripcion, solicitante, tipo);
-        solicitudRepository.guardar(solicitud);
+        solicitudRepository.save(solicitud);
         return solicitud;
     }
 }

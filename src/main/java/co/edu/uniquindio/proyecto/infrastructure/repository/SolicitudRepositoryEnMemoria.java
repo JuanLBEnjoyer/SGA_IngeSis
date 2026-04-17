@@ -18,7 +18,7 @@ public class SolicitudRepositoryEnMemoria implements SolicitudRepository {
     private final Map<CodigoSolicitud, Solicitud> solicitudes = new HashMap<>();
 
     @Override
-    public Solicitud obtenerPorCodigo(CodigoSolicitud codigo) {
+    public Solicitud findById(CodigoSolicitud codigo) {
         Solicitud solicitud = solicitudes.get(codigo);
         if (solicitud == null) {
             throw new ExcepcionDeSolicitudNoEncontrada(codigo);
@@ -27,12 +27,12 @@ public class SolicitudRepositoryEnMemoria implements SolicitudRepository {
     }
 
     @Override
-    public void guardar(Solicitud solicitud) {
+    public void save(Solicitud solicitud) {
         solicitudes.put(solicitud.getCodigo(), solicitud);
     }
 
     @Override
-    public List<Solicitud> obtenerPorEstado(EstadoDeSolicitud estado) {
+    public List<Solicitud> findByEstado(EstadoDeSolicitud estado) {
         return solicitudes.values().stream()
                 .filter(s -> s.getEstado() == estado)
                 .toList();

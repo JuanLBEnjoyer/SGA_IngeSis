@@ -4,7 +4,7 @@ import co.edu.uniquindio.proyecto.domain.entity.Usuario;
 import co.edu.uniquindio.proyecto.domain.valueobject.Documento;
 
 public interface UsuarioRepository {
-    Usuario obtenerPorDocumento(Documento documento);
+    Usuario findByDocumento(Documento documento);
 
-    void guardar(Usuario usuario);
+    void save(Usuario usuario);
 }

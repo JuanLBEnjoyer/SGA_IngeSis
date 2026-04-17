@@ -6,7 +6,7 @@ import co.edu.uniquindio.proyecto.domain.entity.*;
 import co.edu.uniquindio.proyecto.domain.repository.*;
 import co.edu.uniquindio.proyecto.domain.service.AsignarResponsableService;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -20,10 +20,10 @@ public class AsignarResponsableUseCase {
     @Transactional
     public void ejecutar(String codigo, String numeroDocumento, TipoDeDocumento tipoDocumento) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
+        Solicitud solicitud = solicitudRepository.findById(codigoSolicitud);
         Documento documentoResponsable = new Documento(numeroDocumento, tipoDocumento);
-        Usuario responsable = usuarioRepository.obtenerPorDocumento(documentoResponsable);
+        Usuario responsable = usuarioRepository.findByDocumento(documentoResponsable);
         asignarResponsableService.asignar(solicitud, responsable);
-        solicitudRepository.guardar(solicitud);
+        solicitudRepository.save(solicitud);
     }
 }
