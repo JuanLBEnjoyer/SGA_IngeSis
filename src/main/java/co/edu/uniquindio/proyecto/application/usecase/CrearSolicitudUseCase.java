@@ -21,12 +21,12 @@ public class CrearSolicitudUseCase {
             TipoDeDocumento tipoDocumento) {
 
         Documento docSolicitante = new Documento(numeroDocumento, tipoDocumento);
-        Usuario solicitante = usuarioRepository.findByDocumento(docSolicitante);
+        Usuario solicitante = usuarioRepository.obtenerPorDocumento(docSolicitante);
 
         CodigoSolicitud codigo = generadorCodigo.generar();
 
         Solicitud solicitud = new Solicitud(codigo, descripcion, solicitante, tipo);
-        solicitudRepository.save(solicitud);
+        solicitudRepository.guardar(solicitud);
         return solicitud;
     }
 }

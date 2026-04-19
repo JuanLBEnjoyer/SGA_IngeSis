@@ -40,6 +40,30 @@ public class Solicitud {
         this.historial.add(new RegistroHistorial("Solicitud registrada", LocalDateTime.now(), this.estado));
     }
 
+    // Constructor privado para reconstrucción desde base de datos.
+
+    private Solicitud(CodigoSolicitud codigo, String descripcion, Usuario solicitante, TipoDeSolicitud tipo,
+            EstadoDeSolicitud estado, PrioridadDeSolicitud prioridad, Usuario responsable,
+            List<RegistroHistorial> historialExistente) {
+        this.codigo = codigo;
+        this.descripcion = descripcion;
+        this.solicitante = solicitante;
+        this.tipo = tipo;
+        this.estado = estado;
+        this.prioridad = prioridad;
+        this.responsable = responsable;
+        if (historialExistente != null) {
+            this.historial.addAll(historialExistente);
+        }
+    }
+
+    public static Solicitud reconstruirDesdeDB(CodigoSolicitud codigo, String descripcion, Usuario solicitante,
+            TipoDeSolicitud tipo, EstadoDeSolicitud estado, PrioridadDeSolicitud prioridad, Usuario responsable,
+            List<RegistroHistorial> historialExistente) {
+        return new Solicitud(codigo, descripcion, solicitante, tipo, estado, prioridad, responsable,
+                historialExistente);
+    }
+
     public void clasificar(PrioridadDeSolicitud prioridad, String justificacion) {
         if (justificacion == null || justificacion.isBlank()) {
             throw new ExcepcionDeReglaDeDominio("La justificacion no puede estar vacia");

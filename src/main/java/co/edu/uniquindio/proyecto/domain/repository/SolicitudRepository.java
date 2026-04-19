@@ -1,13 +1,14 @@
 package co.edu.uniquindio.proyecto.domain.repository;
 
-import java.util.List;
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.valueobject.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface SolicitudRepository {
-    Solicitud findById(CodigoSolicitud codigo);
+    Solicitud obtenerPorCodigo(CodigoSolicitud codigo);
 
-    void save(Solicitud solicitud);
+    void guardar(Solicitud solicitud);
 
-    List<Solicitud> findByEstado(EstadoDeSolicitud estado);
+    Page<Solicitud> obtenerPorEstado(EstadoDeSolicitud estado, Pageable pageable);
 }

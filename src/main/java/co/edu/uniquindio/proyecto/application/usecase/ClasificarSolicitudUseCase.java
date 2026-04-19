@@ -17,9 +17,9 @@ public class ClasificarSolicitudUseCase {
     @Transactional
     public void ejecutar(String codigo, PrioridadDeSolicitud prioridad, String justificacion) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        Solicitud solicitud = solicitudRepository.findById(codigoSolicitud);
+        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
         solicitud.clasificar(prioridad, justificacion);
-        solicitudRepository.save(solicitud);
+        solicitudRepository.guardar(solicitud);
     }
 
 }

@@ -18,7 +18,7 @@ public class ObtenerSolicitudUseCase {
     @Transactional(readOnly = true)
     public Solicitud ejecutar(String codigo) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        return solicitudRepository.findById(codigoSolicitud);
+        return solicitudRepository.obtenerPorCodigo(codigoSolicitud);
     }
 
 }

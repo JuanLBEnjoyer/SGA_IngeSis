@@ -17,8 +17,8 @@ public class CerrarSolicitudUseCase {
     @Transactional
     public void ejecutar(String codigo, String justificacion) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        Solicitud solicitud = solicitudRepository.findById(codigoSolicitud);
+        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
         solicitud.cerrar(justificacion);
-        solicitudRepository.save(solicitud);
+        solicitudRepository.guardar(solicitud);
     }
 }

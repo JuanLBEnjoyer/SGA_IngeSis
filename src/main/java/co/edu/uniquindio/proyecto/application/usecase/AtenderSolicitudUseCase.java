@@ -17,8 +17,8 @@ public class AtenderSolicitudUseCase {
     @Transactional
     public void ejecutar(String codigo) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        Solicitud solicitud = solicitudRepository.findById(codigoSolicitud);
+        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
         solicitud.atender();
-        solicitudRepository.save(solicitud);
+        solicitudRepository.guardar(solicitud);
     }
 }

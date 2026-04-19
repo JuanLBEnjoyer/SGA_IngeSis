@@ -20,10 +20,10 @@ public class AsignarResponsableUseCase {
     @Transactional
     public void ejecutar(String codigo, String numeroDocumento, TipoDeDocumento tipoDocumento) {
         CodigoSolicitud codigoSolicitud = new CodigoSolicitud(codigo);
-        Solicitud solicitud = solicitudRepository.findById(codigoSolicitud);
+        Solicitud solicitud = solicitudRepository.obtenerPorCodigo(codigoSolicitud);
         Documento documentoResponsable = new Documento(numeroDocumento, tipoDocumento);
-        Usuario responsable = usuarioRepository.findByDocumento(documentoResponsable);
+        Usuario responsable = usuarioRepository.obtenerPorDocumento(documentoResponsable);
         asignarResponsableService.asignar(solicitud, responsable);
-        solicitudRepository.save(solicitud);
+        solicitudRepository.guardar(solicitud);
     }
 }
