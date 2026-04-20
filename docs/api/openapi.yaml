@@ -17,6 +17,8 @@ info:
     Todos los endpoints requieren un token JWT en el header `Authorization`.
     Formato: `Bearer <token>`
 
+    Obtén tu token en `POST /api/auth/login` con email y password.
+
     Los roles disponibles y sus permisos son:
     - **ESTUDIANTE** → puede crear solicitudes y consultar las propias
     - **DOCENTE / ADMINISTRATIVO** → puede clasificar, asignar y atender
@@ -32,6 +34,8 @@ servers:
     description: Servidor de desarrollo local
 
 tags:
+  - name: Autenticación
+    description: Obtención de token JWT
   - name: Solicitudes
     description: Gestión del ciclo de vida completo de una solicitud académica
 
@@ -39,6 +43,40 @@ security:
   - bearerAuth: []
 
 paths:
+
+  /api/auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      description: |
+        Autentica al usuario con email y password y devuelve un token JWT.
+        Incluye el token en las siguientes peticiones como:
+        `Authorization: Bearer <token>`
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: admin@uniquindio.edu.co
+              password: admin123
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /api/solicitudes:
     post:
@@ -110,10 +148,13 @@ paths:
     get:
       tags:
         - Solicitudes
-      summary: Listar solicitudes
+      summary: Listar solicitudes paginadas
       description: |
-        Obtiene la lista de solicitudes. Se puede filtrar por estado.
+        Obtiene la lista paginada de solicitudes. Se puede filtrar por estado.
         Mapea a: `ConsultarSolicitudesPorEstadoUseCase`
+
+        **Paginación:** usa los parámetros `page`, `size` y `sort`.
+        Ejemplo: `GET /api/solicitudes?estado=REGISTRADA&page=0&size=5&sort=codigo,asc`
 
         **Roles permitidos:** DOCENTE, ADMINISTRATIVO, DIRECTIVO
       operationId: listarSolicitudes
@@ -124,15 +165,37 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/EstadoDeSolicitud'
+        - name: page
+          in: query
+          description: Número de página (empieza en 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: "Campo y dirección de ordenamiento. Ej: `codigo,asc` o `estado,desc`"
+          required: false
+          schema:
+            type: string
+            example: "codigo,asc"
       responses:
         '200':
-          description: Lista de solicitudes obtenida exitosamente
+          description: Página de solicitudes obtenida exitosamente
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SolicitudResumenResponse'
+                $ref: '#/components/schemas/PageSolicitudResumenResponse'
         '401':
           $ref: '#/components/responses/Error401'
         '403':
@@ -441,7 +504,7 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: |
-        Token JWT obtenido al autenticarse en el sistema.
+        Token JWT obtenido en `POST /api/auth/login`.
         Incluirlo en cada petición como: `Authorization: Bearer <token>`
 
   parameters:
@@ -508,6 +571,31 @@ components:
             path: "/api/solicitudes"
 
   schemas:
+
+    # ── Autenticación ──────────────────────────────────────────────────────────
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: admin@uniquindio.edu.co
+        password:
+          type: string
+          example: admin123
+
+    JwtResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT para incluir en el header Authorization
+
+    # ── Solicitudes ────────────────────────────────────────────────────────────
 
     CrearSolicitudRequest:
       type: object
@@ -635,6 +723,50 @@ components:
           type: string
           format: date-time
 
+    # ── Paginación ─────────────────────────────────────────────────────────────
+
+    PageSolicitudResumenResponse:
+      type: object
+      description: |
+        Respuesta paginada de Spring. El arreglo de datos está en `content`.
+        Usa `totalElements` y `totalPages` para construir la navegación.
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/SolicitudResumenResponse'
+        totalElements:
+          type: integer
+          format: int64
+          description: Total de solicitudes que coinciden con el filtro
+          example: 25
+        totalPages:
+          type: integer
+          description: Total de páginas disponibles
+          example: 3
+        size:
+          type: integer
+          description: Tamaño de página solicitado
+          example: 10
+        number:
+          type: integer
+          description: Número de página actual (empieza en 0)
+          example: 0
+        first:
+          type: boolean
+          description: Indica si es la primera página
+          example: true
+        last:
+          type: boolean
+          description: Indica si es la última página
+          example: false
+        empty:
+          type: boolean
+          description: Indica si la página no tiene elementos
+          example: false
+
+    # ── Historial ──────────────────────────────────────────────────────────────
+
     RegistroHistorialResponse:
       type: object
       properties:
@@ -659,6 +791,8 @@ components:
           type: string
         rol:
           $ref: '#/components/schemas/RolUsuario'
+
+    # ── Enumerados ─────────────────────────────────────────────────────────────
 
     TipoDeSolicitud:
       type: string
@@ -701,6 +835,8 @@ components:
         - CEDULA
         - PASAPORTE
         - TARJETA_EXTRANJERIA
+
+    # ── Errores ────────────────────────────────────────────────────────────────
 
     ErrorResponse:
       type: object
