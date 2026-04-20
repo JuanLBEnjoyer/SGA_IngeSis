@@ -99,6 +99,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/clasificar ──────────────────────────────
         @PutMapping("/{codigo}/clasificar")
+        @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
         @Operation(summary = "Clasificar una solicitud", description = "Asigna una prioridad a la solicitud y la pasa a estado CLASIFICADA. "
                         +
                         "Precondición: la solicitud debe estar en estado REGISTRADA.")
@@ -116,6 +117,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/asignar ─────────────────────────────────
         @PutMapping("/{codigo}/asignar")
+        @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
         @Operation(summary = "Asignar responsable a una solicitud", description = "Designa un usuario como responsable. "
                         +
                         "Precondición: solicitud en estado CLASIFICADA. " +

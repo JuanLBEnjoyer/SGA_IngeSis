@@ -25,6 +25,7 @@ public interface UsuarioPersistenceMapper {
     @Mapping(target = "tipoDocumento", source = "documento.tipo")
     @Mapping(target = "nombre", source = "nombre")
     @Mapping(target = "email", source = "email.valor")
+    @Mapping(target = "password", constant = "123456")
     @Mapping(target = "rol", source = "rol")
     UsuarioEntity toEntity(Usuario usuario);
 

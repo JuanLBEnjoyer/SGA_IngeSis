@@ -14,6 +14,8 @@ import co.edu.uniquindio.proyecto.infrastructure.rest.SolicitudController;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import co.edu.uniquindio.proyecto.infrastructure.security.JwtService;
+import co.edu.uniquindio.proyecto.infrastructure.security.CustomUserDetailsService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,6 +51,10 @@ class SolicitudControllerTest {
         private ObtenerSolicitudUseCase obtenerSolicitudUseCase;
         @MockitoBean
         private SolicitudMapper mapper;
+        @MockitoBean
+        private JwtService jwtService;
+        @MockitoBean
+        private CustomUserDetailsService customUserDetailsService;
 
         // ── Fixtures ──────────────────────────────────────────────────────────────
         private SolicitudDetalleResponse detalleResponseMock() {

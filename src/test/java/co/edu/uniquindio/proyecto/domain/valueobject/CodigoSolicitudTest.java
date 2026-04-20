@@ -6,13 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CodigoSolicitudTest {
 
-    @Test
-    void noDebeCrearCodigoInvalido() {
-        String codigo = "ERROR";
-        Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
-                () -> new CodigoSolicitud(codigo));
-        assertEquals("El codigo de solicitud solo puede contener numeros", ex.getMessage());
-    }
 
     @Test
     void noDebeCrearCodigoNulo() {

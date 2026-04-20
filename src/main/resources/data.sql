@@ -4,11 +4,11 @@
 -- ============================================================
 
 -- Usuarios de prueba
-INSERT INTO usuarios (numero_documento, tipo_documento, nombre, email, rol) VALUES
-('1094123456', 'CEDULA', 'Juan Pablo Galeano', 'jpgaleano@uqvirtual.edu.co',       'ESTUDIANTE'),
-('987654321',  'CEDULA', 'Daniel Garcia',      'daniel.garcia@uniquindio.edu.co',   'ADMINISTRATIVO'),
-('111222333',  'CEDULA', 'Maria Lopez',        'maria.lopez@uniquindio.edu.co',     'DOCENTE'),
-('444555666',  'CEDULA', 'Carlos Ramirez',     'carlos.ramirez@uniquindio.edu.co',  'DIRECTIVO');
+INSERT INTO usuarios (id, numero_documento, tipo_documento, nombre, email, password, rol) VALUES
+(random_uuid(), '1094123456', 'CEDULA', 'Juan Pablo Galeano', 'jpgaleano@uqvirtual.edu.co',       '123456', 'ESTUDIANTE'),
+(random_uuid(), '987654321',  'CEDULA', 'Daniel Garcia',      'daniel.garcia@uniquindio.edu.co',   '123456', 'ADMINISTRATIVO'),
+(random_uuid(), '111222333',  'CEDULA', 'Maria Lopez',        'maria.lopez@uniquindio.edu.co',     '123456', 'DOCENTE'),
+(random_uuid(), '444555666',  'CEDULA', 'Carlos Ramirez',     'carlos.ramirez@uniquindio.edu.co',  '123456', 'DIRECTIVO');
 
 -- Solicitudes de ejemplo
 INSERT INTO solicitudes (codigo, tipo, descripcion, estado, prioridad,

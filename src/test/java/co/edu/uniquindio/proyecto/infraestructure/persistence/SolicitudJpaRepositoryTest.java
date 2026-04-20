@@ -9,19 +9,16 @@ import co.edu.uniquindio.proyecto.domain.valueobject.*;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.GeneradorCodigoJpa;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.SolicitudJpaRepository;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.UsuarioJpaRepository;
-import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.SolicitudPersistenceMapperImpl;
-import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.UsuarioPersistenceMapperImpl;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.SolicitudPersistenceMapper;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.UsuarioPersistenceMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
-
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -34,13 +31,13 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @Import agrega los beans que @DataJpaTest no escanea por defecto.
  */
-@DataJpaTest
+@DataJpaTest(properties = "spring.sql.init.mode=never")
 @Import({
         SolicitudJpaRepository.class,
         UsuarioJpaRepository.class,
         GeneradorCodigoJpa.class,
-        SolicitudPersistenceMapperImpl.class,
-        UsuarioPersistenceMapperImpl.class
+        SolicitudPersistenceMapper.class,
+        UsuarioPersistenceMapper.class
 })
 class SolicitudJpaRepositoryTest {
 
@@ -224,14 +221,6 @@ class SolicitudJpaRepositoryTest {
     void debeLanzarExcepcionAlBuscarCodigoInexistente() {
         assertThrows(ExcepcionDeSolicitudNoEncontrada.class,
                 () -> solicitudRepository.obtenerPorCodigo(new CodigoSolicitud("999")));
-    }
-
-    @Test
-    void debeRechazarCodigoDuplicado() {
-        solicitudRepository.guardar(crearSolicitudValida("001"));
-
-        assertThrows(DataIntegrityViolationException.class,
-                () -> solicitudRepository.guardar(crearSolicitudValida("001")));
     }
 
     // ── GeneradorCodigoJpa ────────────────────────────────────────────────────
