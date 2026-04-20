@@ -11,4 +11,6 @@ public interface SolicitudRepository {
     void guardar(Solicitud solicitud);
 
     Page<Solicitud> obtenerPorEstado(EstadoDeSolicitud estado, Pageable pageable);
+
+    Page<Solicitud> obtenerExcluyendoEstado(EstadoDeSolicitud estado, Pageable pageable);
 }
