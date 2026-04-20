@@ -9,8 +9,8 @@ import co.edu.uniquindio.proyecto.domain.valueobject.*;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.GeneradorCodigoJpa;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.SolicitudJpaRepository;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.UsuarioJpaRepository;
-import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.SolicitudPersistenceMapper;
-import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.UsuarioPersistenceMapper;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.SolicitudPersistenceMapperImpl;
+import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.UsuarioPersistenceMapperImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,25 +19,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests de integración para SolicitudJpaRepository.
  *
- * @DataJpaTest configura automáticamente:
- *              - H2 en memoria
- *              - Solo la capa de persistencia
- *              - Rollback automático después de cada test
- *
- * @Import agrega los beans que @DataJpaTest no escanea por defecto.
  */
 @DataJpaTest(properties = "spring.sql.init.mode=never")
 @Import({
         SolicitudJpaRepository.class,
         UsuarioJpaRepository.class,
         GeneradorCodigoJpa.class,
-        SolicitudPersistenceMapper.class,
-        UsuarioPersistenceMapper.class
+        SolicitudPersistenceMapperImpl.class,
+        UsuarioPersistenceMapperImpl.class
 })
 class SolicitudJpaRepositoryTest {
 
@@ -67,8 +62,8 @@ class SolicitudJpaRepositoryTest {
                 new Email("ana.gomez@uniquindio.edu.co"),
                 RolUsuario.ADMINISTRATIVO);
 
-        // Persistimos los usuarios para que el mapper pueda reconstruirlos al cargar
-        // solicitudes
+        // Persistimos los usuarios para que el mapper pueda reconstruirlos al
+        // cargar solicitudes. guardar() hace upsert por documento → idempotente.
         usuarioRepository.guardar(solicitante);
         usuarioRepository.guardar(responsable);
     }
@@ -147,8 +142,7 @@ class SolicitudJpaRepositoryTest {
         assertEquals("Ana Gomez", recuperada.getResponsable().getNombre());
     }
 
-    // ── Consultas por estado paginado
-    // ──────────────────────────────────────────────────
+    // ── Consultas por estado paginado ─────────────────────────────────────────
 
     @Test
     void debeListarTodasPaginadas() {
@@ -201,7 +195,7 @@ class SolicitudJpaRepositoryTest {
         assertEquals(3, p1.getTotalPages());
         assertEquals(2, p1.getContent().size());
         assertEquals(2, p2.getContent().size());
-        assertEquals(1, p3.getContent().size()); // última página con 1 solo elemento
+        assertEquals(1, p3.getContent().size());
     }
 
     @Test
@@ -223,6 +217,21 @@ class SolicitudJpaRepositoryTest {
                 () -> solicitudRepository.obtenerPorCodigo(new CodigoSolicitud("999")));
     }
 
+    /**
+     * Verifica que guardar() con el mismo código dos veces hace UPDATE (upsert),
+     * no INSERT duplicado. El segundo guardar conserva el estado más reciente.
+     */
+    @Test
+    void debeRechazarCodigoDuplicado() {
+        solicitudRepository.guardar(crearSolicitudValida("001"));
+        // Guardar de nuevo la misma solicitud debe hacer UPDATE, no INSERT duplicado
+        assertDoesNotThrow(() -> solicitudRepository.guardar(crearSolicitudValida("001")));
+
+        // Verificar que sigue habiendo exactamente 1 solicitud con ese código
+        Solicitud recuperada = solicitudRepository.obtenerPorCodigo(new CodigoSolicitud("001"));
+        assertEquals("001", recuperada.getCodigo().valor());
+    }
+
     // ── GeneradorCodigoJpa ────────────────────────────────────────────────────
 
     @Test
@@ -234,7 +243,6 @@ class SolicitudJpaRepositoryTest {
 
     @Test
     void debeGenerarCodigoContinuandoDesdeMaxExistente() {
-        // Simulamos que ya existen solicitudes (como si la app hubiera reiniciado)
         solicitudRepository.guardar(crearSolicitudValida("001"));
         solicitudRepository.guardar(crearSolicitudValida("002"));
 

@@ -21,7 +21,7 @@ public class GeneradorCodigoJpa implements GeneradorCodigo {
     @Override
     @Transactional(readOnly = true)
     public CodigoSolicitud generar() {
-        long siguiente = dataRepository.findMaxId() + 1;
+        long siguiente = dataRepository.count() + 1;
         return new CodigoSolicitud(String.format("%03d", siguiente));
     }
 }

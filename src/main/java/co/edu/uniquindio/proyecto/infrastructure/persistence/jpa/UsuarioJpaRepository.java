@@ -34,6 +34,14 @@ public class UsuarioJpaRepository implements UsuarioRepository {
 
     @Override
     public void guardar(Usuario usuario) {
-        dataRepository.save(mapper.toEntity(usuario));
+        var entity = mapper.toEntity(usuario);
+        // Upsert: si ya existe un usuario con ese documento, reusar su ID
+        // para que JPA haga UPDATE en lugar de INSERT (evita violar UNIQUE).
+        dataRepository
+                .findByNumeroDocumentoAndTipoDocumento(
+                        usuario.getDocumento().numero(),
+                        usuario.getDocumento().tipo().name())
+                .ifPresent(existing -> entity.setId(existing.getId()));
+        dataRepository.save(entity);
     }
 }
