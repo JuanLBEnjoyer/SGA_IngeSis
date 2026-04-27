@@ -99,7 +99,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/clasificar ──────────────────────────────
         @PutMapping("/{codigo}/clasificar")
-        @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
+        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMINISTRATIVO', 'DIRECTIVO')")
         @Operation(summary = "Clasificar una solicitud", description = "Asigna una prioridad a la solicitud y la pasa a estado CLASIFICADA. "
                         +
                         "Precondición: la solicitud debe estar en estado REGISTRADA.")
@@ -117,7 +117,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/asignar ─────────────────────────────────
         @PutMapping("/{codigo}/asignar")
-        @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ROLE_ADMIN')")
+        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMINISTRATIVO', 'DIRECTIVO')")
         @Operation(summary = "Asignar responsable a una solicitud", description = "Designa un usuario como responsable. "
                         +
                         "Precondición: solicitud en estado CLASIFICADA. " +
@@ -139,6 +139,7 @@ public class SolicitudController {
 
         // ── PATCH /api/solicitudes/{codigo}/atender ───────────────────────────────
         @PatchMapping("/{codigo}/atender")
+        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('DOCENTE', 'ADMINISTRATIVO', 'DIRECTIVO')")
         @Operation(summary = "Marcar una solicitud como atendida", description = "Registra que la solicitud fue atendida. "
                         +
                         "Precondición: solicitud en estado EN_ATENCION.")
@@ -156,6 +157,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/cerrar ──────────────────────────────────
         @PutMapping("/{codigo}/cerrar")
+        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMINISTRATIVO', 'DIRECTIVO')")
         @Operation(summary = "Cerrar una solicitud", description = "Finaliza el ciclo de vida de la solicitud. " +
                         "Precondición: solicitud en estado ATENDIDA.")
         @ApiResponse(responseCode = "200", description = "Solicitud cerrada exitosamente")

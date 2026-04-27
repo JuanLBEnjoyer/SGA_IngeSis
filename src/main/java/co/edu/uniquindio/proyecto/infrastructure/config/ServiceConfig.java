@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import co.edu.uniquindio.proyecto.domain.service.AsignarResponsableService;
 
 @Configuration
-public class UseCaseConfig {
+public class ServiceConfig {
     @Bean
     public AsignarResponsableService asignarResponsableService() {
         return new AsignarResponsableService();

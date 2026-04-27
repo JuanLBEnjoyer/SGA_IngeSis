@@ -14,8 +14,8 @@ import co.edu.uniquindio.proyecto.infrastructure.rest.SolicitudController;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import co.edu.uniquindio.proyecto.infrastructure.security.JwtService;
-import co.edu.uniquindio.proyecto.infrastructure.security.CustomUserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SolicitudController.class)
+@WithMockUser
 class SolicitudControllerTest {
 
         @Autowired
@@ -52,10 +53,7 @@ class SolicitudControllerTest {
         @MockitoBean
         private SolicitudMapper mapper;
         @MockitoBean
-        private JwtService jwtService;
-        @MockitoBean
-        private CustomUserDetailsService customUserDetailsService;
-
+        private JwtDecoder jwtDecoder;
         // ── Fixtures ──────────────────────────────────────────────────────────────
         private SolicitudDetalleResponse detalleResponseMock() {
                 return new SolicitudDetalleResponse(
@@ -216,6 +214,7 @@ class SolicitudControllerTest {
 
         // ── PUT /api/solicitudes/{codigo}/clasificar ──────────────────────────────
         @Test
+        @WithMockUser(roles = "ADMINISTRATIVO")
         void debeClasificarSolicitudConDatosValidos() throws Exception {
                 Solicitud solicitudMock = mock(Solicitud.class);
                 when(obtenerSolicitudUseCase.ejecutar("001")).thenReturn(solicitudMock);
@@ -241,6 +240,7 @@ class SolicitudControllerTest {
         }
 
         @Test
+        @WithMockUser(roles = "ADMINISTRATIVO")
         void debeRetornar400CuandoJustificacionEstaVaciaAlClasificar() throws Exception {
                 String body = """
                                 {
@@ -260,6 +260,7 @@ class SolicitudControllerTest {
 
         // ── PUT /api/solicitudes/{codigo}/asignar ─────────────────────────────────
         @Test
+        @WithMockUser(roles = "ADMINISTRATIVO")
         void debeAsignarResponsableConDocumentoCompleto() throws Exception {
                 Solicitud solicitudMock = mock(Solicitud.class);
                 when(obtenerSolicitudUseCase.ejecutar("001")).thenReturn(solicitudMock);
@@ -284,6 +285,7 @@ class SolicitudControllerTest {
         }
 
         @Test
+        @WithMockUser(roles = "ADMINISTRATIVO")
         void debeRetornar400CuandoFaltaTipoDocumentoAlAsignar() throws Exception {
                 String body = """
                                 {
@@ -302,6 +304,7 @@ class SolicitudControllerTest {
 
         // ── PATCH /api/solicitudes/{codigo}/atender ───────────────────────────────
         @Test
+        @WithMockUser(roles = "DOCENTE")
         void debeAtenderSolicitudConObservacionValida() throws Exception {
                 Solicitud solicitudMock = mock(Solicitud.class);
                 when(obtenerSolicitudUseCase.ejecutar("001")).thenReturn(solicitudMock);
@@ -322,6 +325,7 @@ class SolicitudControllerTest {
         }
 
         @Test
+        @WithMockUser(roles = "DOCENTE")
         void debeRetornar400CuandoObservacionEstaVaciaAlAtender() throws Exception {
                 String body = """
                                 {
@@ -340,6 +344,7 @@ class SolicitudControllerTest {
 
         // ── PUT /api/solicitudes/{codigo}/cerrar ──────────────────────────────────
         @Test
+        @WithMockUser(roles = "DIRECTIVO")
         void debeCerrarSolicitudConObservacionValida() throws Exception {
                 Solicitud solicitudMock = mock(Solicitud.class);
                 when(obtenerSolicitudUseCase.ejecutar("001")).thenReturn(solicitudMock);
@@ -362,6 +367,7 @@ class SolicitudControllerTest {
         }
 
         @Test
+        @WithMockUser(roles = "DIRECTIVO")
         void debeRetornar400CuandoObservacionEstaVaciaAlCerrar() throws Exception {
                 String body = """
                                 {

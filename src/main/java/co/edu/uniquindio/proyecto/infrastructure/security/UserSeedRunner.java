@@ -18,31 +18,49 @@ public class UserSeedRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (usuarioRepository.count() == 0) {
-            String encodedPassword = passwordEncoder.encode("admin123");
-
-            UsuarioEntity admin = new UsuarioEntity();
-            admin.setNumeroDocumento("1234567890");
-            admin.setTipoDocumento("CC");
-            admin.setNombre("Administrador Principal");
-            admin.setEmail("admin@uniquindio.edu.co");
-            admin.setPassword(encodedPassword);
-            admin.setRol(RolUsuario.DIRECTIVO); // Será mapeado a ADMIN
-
-            usuarioRepository.save(admin);
+            String encodedPassword = passwordEncoder.encode("123456");
 
             UsuarioEntity estudiante = new UsuarioEntity();
-            estudiante.setNumeroDocumento("1094000123");
-            estudiante.setTipoDocumento("TI");
-            estudiante.setNombre("Estudiante General");
-            estudiante.setEmail("estudiante@uqvirtual.edu.co");
-            estudiante.setPassword(passwordEncoder.encode("user123"));
-            estudiante.setRol(RolUsuario.ESTUDIANTE); // Será mapeado a USER
-
+            estudiante.setNumeroDocumento("1094123456");
+            estudiante.setTipoDocumento("CEDULA");
+            estudiante.setNombre("Juan Pablo Galeano");
+            estudiante.setEmail("jpgaleano@uqvirtual.edu.co");
+            estudiante.setPassword(encodedPassword);
+            estudiante.setRol(RolUsuario.ESTUDIANTE);
             usuarioRepository.save(estudiante);
 
-            System.out.println("====== USUARIOS DEFAULT CREADOS EN H2 ======");
-            System.out.println("Admin -> admin@uniquindio.edu.co / admin123");
-            System.out.println("User -> estudiante@uqvirtual.edu.co / user123");
+            UsuarioEntity admin = new UsuarioEntity();
+            admin.setNumeroDocumento("987654321");
+            admin.setTipoDocumento("CEDULA");
+            admin.setNombre("Daniel Garcia");
+            admin.setEmail("daniel.garcia@uniquindio.edu.co");
+            admin.setPassword(encodedPassword);
+            admin.setRol(RolUsuario.ADMINISTRATIVO);
+            usuarioRepository.save(admin);
+
+            UsuarioEntity docente = new UsuarioEntity();
+            docente.setNumeroDocumento("111222333");
+            docente.setTipoDocumento("CEDULA");
+            docente.setNombre("Maria Lopez");
+            docente.setEmail("maria.lopez@uniquindio.edu.co");
+            docente.setPassword(encodedPassword);
+            docente.setRol(RolUsuario.DOCENTE);
+            usuarioRepository.save(docente);
+
+            UsuarioEntity directivo = new UsuarioEntity();
+            directivo.setNumeroDocumento("444555666");
+            directivo.setTipoDocumento("CEDULA");
+            directivo.setNombre("Carlos Ramirez");
+            directivo.setEmail("carlos.ramirez@uniquindio.edu.co");
+            directivo.setPassword(encodedPassword);
+            directivo.setRol(RolUsuario.DIRECTIVO);
+            usuarioRepository.save(directivo);
+
+            System.out.println("====== USUARIOS DEFAULT CREADOS EN H2 (BCRYPT) ======");
+            System.out.println("Estudiante -> jpgaleano@uqvirtual.edu.co / 123456");
+            System.out.println("Administrativo -> daniel.garcia@uniquindio.edu.co / 123456");
+            System.out.println("Docente -> maria.lopez@uniquindio.edu.co / 123456");
+            System.out.println("Directivo -> carlos.ramirez@uniquindio.edu.co / 123456");
         }
     }
 }

@@ -18,30 +18,9 @@ public class SecurityBeansConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        return new AuthenticationProvider() {
-            @Override
-            public org.springframework.security.core.Authentication authenticate(
-                    org.springframework.security.core.Authentication authentication)
-                    throws org.springframework.security.core.AuthenticationException {
-                String email = authentication.getName();
-                String pwd = authentication.getCredentials().toString();
-                org.springframework.security.core.userdetails.UserDetails userDetails = userDetailsService
-                        .loadUserByUsername(email);
-                if (passwordEncoder().matches(pwd, userDetails.getPassword())) {
-                    return new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                            userDetails, pwd, userDetails.getAuthorities());
-                } else {
-                    throw new org.springframework.security.authentication.BadCredentialsException(
-                            "Credenciales Inválidas");
-                }
-            }
-
-            @Override
-            public boolean supports(Class<?> authentication) {
-                return org.springframework.security.authentication.UsernamePasswordAuthenticationToken.class
-                        .isAssignableFrom(authentication);
-            }
-        };
+        org.springframework.security.authentication.dao.DaoAuthenticationProvider provider = new org.springframework.security.authentication.dao.DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean

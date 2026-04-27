@@ -3,12 +3,7 @@
 -- Se ejecuta automáticamente al arrancar con ddl-auto=create-drop
 -- ============================================================
 
--- Usuarios de prueba
-INSERT INTO usuarios (id, numero_documento, tipo_documento, nombre, email, password, rol) VALUES
-(random_uuid(), '1094123456', 'CEDULA', 'Juan Pablo Galeano', 'jpgaleano@uqvirtual.edu.co',       '123456', 'ESTUDIANTE'),
-(random_uuid(), '987654321',  'CEDULA', 'Daniel Garcia',      'daniel.garcia@uniquindio.edu.co',   '123456', 'ADMINISTRATIVO'),
-(random_uuid(), '111222333',  'CEDULA', 'Maria Lopez',        'maria.lopez@uniquindio.edu.co',     '123456', 'DOCENTE'),
-(random_uuid(), '444555666',  'CEDULA', 'Carlos Ramirez',     'carlos.ramirez@uniquindio.edu.co',  '123456', 'DIRECTIVO');
+-- Los usuarios se cargan programáticamente en UserSeedRunner con contraseñas encriptadas con BCrypt
 
 -- Solicitudes de ejemplo
 INSERT INTO solicitudes (codigo, tipo, descripcion, estado, prioridad,

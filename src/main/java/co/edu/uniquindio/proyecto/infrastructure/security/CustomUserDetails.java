@@ -17,11 +17,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String roleStr = "ROLE_USER"; 
-        // Lógica de mapeo según la opción 2 del plan: ADMINISTRATIVO/DIRECTIVO -> ADMIN
-        if (usuarioEntity.getRol() == RolUsuario.ADMINISTRATIVO || usuarioEntity.getRol() == RolUsuario.DIRECTIVO) {
-            roleStr = "ROLE_ADMIN";
-        }
+        String roleStr = "ROLE_" + usuarioEntity.getRol().name();
         return List.of(new SimpleGrantedAuthority(roleStr));
     }
 
