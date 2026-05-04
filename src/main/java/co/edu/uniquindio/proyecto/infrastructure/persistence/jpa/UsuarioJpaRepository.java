@@ -52,4 +52,12 @@ public class UsuarioJpaRepository implements UsuarioRepository {
                                 });
                 dataRepository.save(entity);
         }
+
+        @Override
+        @Transactional(readOnly = true)
+        public Usuario obtenerPorEmail(String email) {
+                return dataRepository.findByEmail(email)
+                                .map(mapper::toDomain)
+                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+        }
 }

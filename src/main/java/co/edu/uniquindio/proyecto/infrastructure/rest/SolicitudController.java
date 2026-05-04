@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -81,7 +83,15 @@ public class SolicitudController {
                         @RequestParam(required = false) EstadoDeSolicitud estado,
                         @PageableDefault(size = 10, sort = "codigo") Pageable pageable) {
 
-                Page<Solicitud> pagina = consultarPorEstadoUseCase.ejecutar(estado, pageable);
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                boolean esJerarquiaAlta = authentication.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_DIRECTIVO")
+                                                || a.getAuthority().equals("ROLE_ADMINISTRATIVO")
+                                                || a.getAuthority().equals("DIRECTIVO")
+                                                || a.getAuthority().equals("ADMINISTRATIVO"));
+                String email = authentication.getName();
+
+                Page<Solicitud> pagina = consultarPorEstadoUseCase.ejecutar(estado, pageable, email, esJerarquiaAlta);
                 return ResponseEntity.ok(pagina.map(mapper::toResumenResponse));
         }
 

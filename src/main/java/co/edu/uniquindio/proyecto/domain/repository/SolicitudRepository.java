@@ -12,5 +12,9 @@ public interface SolicitudRepository {
 
     Page<Solicitud> obtenerPorEstado(EstadoDeSolicitud estado, Pageable pageable);
 
+    Page<Solicitud> obtenerPorSolicitante(String documento, Pageable pageable);
+
+    Page<Solicitud> obtenerPorEstadoYSolicitante(EstadoDeSolicitud estado, String documento, Pageable pageable);
+
     Page<Solicitud> obtenerExcluyendoEstado(EstadoDeSolicitud estado, Pageable pageable);
 }

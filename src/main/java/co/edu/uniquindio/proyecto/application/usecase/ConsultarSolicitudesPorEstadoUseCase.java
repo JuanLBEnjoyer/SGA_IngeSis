@@ -16,9 +16,15 @@ import lombok.RequiredArgsConstructor;
 public class ConsultarSolicitudesPorEstadoUseCase {
 
     private final SolicitudRepository solicitudRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Transactional(readOnly = true)
-    public Page<Solicitud> ejecutar(EstadoDeSolicitud estado, Pageable pageable) {
-        return solicitudRepository.obtenerPorEstado(estado, pageable);
+    public Page<Solicitud> ejecutar(EstadoDeSolicitud estado, Pageable pageable, String email, boolean maxJerarquia) {
+        if (maxJerarquia) {
+            return solicitudRepository.obtenerPorEstado(estado, pageable);
+        } else {
+            Usuario usuario = usuarioRepository.obtenerPorEmail(email);
+            return solicitudRepository.obtenerPorEstadoYSolicitante(estado, usuario.getDocumento().numero(), pageable);
+        }
     }
 }

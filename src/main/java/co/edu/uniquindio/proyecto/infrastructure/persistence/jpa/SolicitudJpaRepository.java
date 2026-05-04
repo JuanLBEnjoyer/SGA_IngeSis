@@ -60,4 +60,21 @@ public class SolicitudJpaRepository implements SolicitudRepository {
         return dataRepository.findByEstadoNot(estado, pageable)
                 .map(entity -> mapper.toDomain(entity, usuarioRepository));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Solicitud> obtenerPorSolicitante(String documento, Pageable pageable) {
+        return dataRepository.findBySolicitanteDocumento(documento, pageable)
+                .map(entity -> mapper.toDomain(entity, usuarioRepository));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Solicitud> obtenerPorEstadoYSolicitante(EstadoDeSolicitud estado, String documento, Pageable pageable) {
+        if (estado == null) {
+            return obtenerPorSolicitante(documento, pageable);
+        }
+        return dataRepository.findBySolicitanteDocumentoAndEstado(documento, estado, pageable)
+                .map(entity -> mapper.toDomain(entity, usuarioRepository));
+    }
 }

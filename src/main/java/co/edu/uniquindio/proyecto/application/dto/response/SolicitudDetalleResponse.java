@@ -15,18 +15,15 @@ import java.time.LocalDateTime;
  * - PUT /api/solicitudes/{codigo}/asignar
  * - PATCH /api/solicitudes/{codigo}/atender
  * - PUT /api/solicitudes/{codigo}/cerrar
- *
- * Nota: responsable puede ser null si aún no fue asignado.
- * Nota: prioridad puede ser null si aún no fue clasificada.
  */
 public record SolicitudDetalleResponse(
-        String codigo,
-        TipoDeSolicitud tipo,
-        String descripcion,
-        EstadoDeSolicitud estado,
-        PrioridadDeSolicitud prioridad,
-        UsuarioResumenResponse solicitante,
-        UsuarioResumenResponse responsable,
-        LocalDateTime fechaCreacion,
-        int totalRegistrosHistorial) {
+                String codigo,
+                TipoDeSolicitud tipo,
+                String descripcion,
+                EstadoDeSolicitud estado,
+                PrioridadDeSolicitud prioridad,
+                UsuarioResumenResponse solicitante,
+                UsuarioResumenResponse responsable,
+                LocalDateTime fechaCreacion,
+                int totalRegistrosHistorial) {
 }

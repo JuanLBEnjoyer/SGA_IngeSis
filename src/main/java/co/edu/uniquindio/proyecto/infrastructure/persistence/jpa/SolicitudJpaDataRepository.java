@@ -21,6 +21,10 @@ interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long
 
     long countByEstado(EstadoDeSolicitud estado);
 
+    Page<SolicitudEntity> findBySolicitanteDocumento(String documento, Pageable pageable);
+
+    Page<SolicitudEntity> findBySolicitanteDocumentoAndEstado(String documento, EstadoDeSolicitud estado, Pageable pageable);
+
     List<SolicitudEntity> findBySolicitanteDocumento(String documento);
 
     @Query("SELECT s FROM SolicitudEntity s WHERE s.estado IN ('REGISTRADA', 'CLASIFICADA')")

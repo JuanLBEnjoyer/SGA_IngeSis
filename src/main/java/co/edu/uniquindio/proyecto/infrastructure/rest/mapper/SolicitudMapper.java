@@ -2,14 +2,13 @@ package co.edu.uniquindio.proyecto.infrastructure.rest.mapper;
 
 import co.edu.uniquindio.proyecto.application.dto.response.*;
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
-import co.edu.uniquindio.proyecto.domain.entity.Usuario;
 import co.edu.uniquindio.proyecto.domain.valueobject.RegistroHistorial;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { UsuarioMapper.class })
 public interface SolicitudMapper {
 
     // ── Solicitud → SolicitudDetalleResponse ──────────────────────────────────
@@ -36,14 +35,6 @@ public interface SolicitudMapper {
     SolicitudResumenResponse toResumenResponse(Solicitud solicitud);
 
     List<SolicitudResumenResponse> toResumenResponseList(List<Solicitud> solicitudes);
-
-    // ── Usuario → UsuarioResumenResponse ──────────────────────────────────────
-    @Mapping(target = "numeroDocumento", source = "documento.numero")
-    @Mapping(target = "tipoDocumento", source = "documento.tipo")
-    @Mapping(target = "nombre", source = "nombre")
-    @Mapping(target = "email", source = "email.valor")
-    @Mapping(target = "rol", source = "rol")
-    UsuarioResumenResponse toUsuarioResumen(Usuario usuario);
 
     // ── RegistroHistorial → RegistroHistorialResponse ─────────────────────────
     @Mapping(target = "descripcion", source = "descripcion")
