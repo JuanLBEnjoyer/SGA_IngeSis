@@ -18,30 +18,38 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UsuarioJpaRepository implements UsuarioRepository {
 
-    private final UsuarioJpaDataRepository dataRepository;
-    private final UsuarioPersistenceMapper mapper;
+        private final UsuarioJpaDataRepository dataRepository;
+        private final UsuarioPersistenceMapper mapper;
 
-    @Override
-    @Transactional(readOnly = true)
-    public Usuario obtenerPorDocumento(Documento documento) {
-        return dataRepository
-                .findByNumeroDocumentoAndTipoDocumento(
-                        documento.numero(),
-                        documento.tipo().name())
-                .map(mapper::toDomain)
-                .orElseThrow(() -> new ExcepcionDeUsuarioNoEncontrado(documento));
-    }
+        @Override
+        @Transactional(readOnly = true)
+        public Usuario obtenerPorDocumento(Documento documento) {
+                return dataRepository
+                                .findByNumeroDocumentoAndTipoDocumento(
+                                                documento.numero(),
+                                                documento.tipo().name())
+                                .map(mapper::toDomain)
+                                .orElseThrow(() -> new ExcepcionDeUsuarioNoEncontrado(documento));
+        }
 
-    @Override
-    public void guardar(Usuario usuario) {
-        var entity = mapper.toEntity(usuario);
-        // Upsert: si ya existe un usuario con ese documento, reusar su ID
-        // para que JPA haga UPDATE en lugar de INSERT (evita violar UNIQUE).
-        dataRepository
-                .findByNumeroDocumentoAndTipoDocumento(
-                        usuario.getDocumento().numero(),
-                        usuario.getDocumento().tipo().name())
-                .ifPresent(existing -> entity.setId(existing.getId()));
-        dataRepository.save(entity);
-    }
+        @Override
+        public void guardar(Usuario usuario, String passwordEncriptado) {
+                var entity = mapper.toEntity(usuario);
+                
+                if (passwordEncriptado != null) {
+                        entity.setPassword(passwordEncriptado);
+                }
+                
+                // Upsert: si ya existe un usuario con ese documento, reusar su ID
+                // para que JPA haga UPDATE en lugar de INSERT (evita violar UNIQUE).
+                dataRepository.findByNumeroDocumentoAndTipoDocumento(
+                                usuario.getDocumento().numero(),
+                                usuario.getDocumento().tipo().name()).ifPresent(existing -> {
+                                        entity.setId(existing.getId());
+                                        if (passwordEncriptado == null) {
+                                                entity.setPassword(existing.getPassword());
+                                        }
+                                });
+                dataRepository.save(entity);
+        }
 }

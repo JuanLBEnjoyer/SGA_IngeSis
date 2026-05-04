@@ -64,8 +64,8 @@ class SolicitudJpaRepositoryTest {
 
         // Persistimos los usuarios para que el mapper pueda reconstruirlos al
         // cargar solicitudes. guardar() hace upsert por documento → idempotente.
-        usuarioRepository.guardar(solicitante);
-        usuarioRepository.guardar(responsable);
+        usuarioRepository.guardar(solicitante, "dummyPassword");
+        usuarioRepository.guardar(responsable, "dummyPassword");
     }
 
     private Solicitud crearSolicitudValida(String codigo) {

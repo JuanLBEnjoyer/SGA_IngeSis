@@ -40,7 +40,7 @@ class UsuarioJpaRepositoryTest {
     @Test
     void debeGuardarYRecuperarPorDocumento() {
         usuarioRepository.guardar(crearUsuario("123456", "Daniel Garcia",
-                "daniel.garcia@uniquindio.edu.co", RolUsuario.ESTUDIANTE));
+                "daniel.garcia@uniquindio.edu.co", RolUsuario.ESTUDIANTE), "dummyPassword");
 
         Documento doc = new Documento("123456", TipoDeDocumento.CEDULA);
         Usuario recuperado = usuarioRepository.obtenerPorDocumento(doc);
@@ -54,7 +54,7 @@ class UsuarioJpaRepositoryTest {
     @Test
     void debeReconstruirEmailComoValueObject() {
         usuarioRepository.guardar(crearUsuario("123456", "Daniel Garcia",
-                "daniel.garcia@uniquindio.edu.co", RolUsuario.ADMINISTRATIVO));
+                "daniel.garcia@uniquindio.edu.co", RolUsuario.ADMINISTRATIVO), "dummyPassword");
 
         Usuario recuperado = usuarioRepository.obtenerPorDocumento(
                 new Documento("123456", TipoDeDocumento.CEDULA));
@@ -78,8 +78,8 @@ class UsuarioJpaRepositoryTest {
                 new Email("pasaporte@uniquindio.edu.co"),
                 RolUsuario.ESTUDIANTE);
 
-        usuarioRepository.guardar(conCedula);
-        usuarioRepository.guardar(conPasaporte);
+        usuarioRepository.guardar(conCedula, "dummyPassword");
+        usuarioRepository.guardar(conPasaporte, "dummyPassword");
 
         Usuario recuperadoCedula = usuarioRepository.obtenerPorDocumento(
                 new Documento("123456", TipoDeDocumento.CEDULA));
@@ -105,12 +105,12 @@ class UsuarioJpaRepositoryTest {
     @Test
     void debeRechazarDocumentoDuplicado() {
         usuarioRepository.guardar(crearUsuario("123456", "Daniel Garcia",
-                "daniel.garcia@uniquindio.edu.co", RolUsuario.ESTUDIANTE));
+                "daniel.garcia@uniquindio.edu.co", RolUsuario.ESTUDIANTE), "dummyPassword");
 
         // Guardar con mismo documento pero rol distinto → debe hacer UPDATE, no fallar
         assertDoesNotThrow(() -> usuarioRepository.guardar(
                 crearUsuario("123456", "Daniel Garcia", "daniel.garcia@uniquindio.edu.co",
-                        RolUsuario.DOCENTE)));
+                        RolUsuario.DOCENTE), "dummyPassword"));
 
         // Verificar que sigue habiendo exactamente 1 usuario con ese documento
         Usuario recuperado = usuarioRepository.obtenerPorDocumento(

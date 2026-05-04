@@ -10,8 +10,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-
-import org.springframework.security.config.Customizer;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
@@ -21,45 +19,47 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final AuthenticationProvider authenticationProvider;
+        private final AuthenticationProvider authenticationProvider;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                // Necesario para que la consola H2 funcione dentro de iframes
-                .headers(headers -> headers.frameOptions(
-                        frameOptions -> frameOptions.sameOrigin()))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/public/**",
-                                "/error",
-                                // Swagger UI
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                // OpenAPI JSON
-                                "/v3/api-docs/**",
-                                "/api-docs/**",
-                                // H2 Console
-                                "/h2-console/**")
-                        .permitAll()
-                        .anyRequest().authenticated())
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                                .csrf(AbstractHttpConfigurer::disable)
+                                // Necesario para que la consola H2 funcione dentro de iframes
+                                .headers(headers -> headers.frameOptions(
+                                                frameOptions -> frameOptions.sameOrigin()))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(
+                                                                "/api/auth/**",
+                                                                "/public/**",
+                                                                "/error",
+                                                                // Swagger UI
+                                                                "/swagger-ui/**",
+                                                                "/swagger-ui.html",
+                                                                // OpenAPI JSON
+                                                                "/v3/api-docs/**",
+                                                                "/api-docs/**",
+                                                                // H2 Console
+                                                                "/h2-console/**")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authenticationProvider(authenticationProvider)
+                                .oauth2ResourceServer(oauth2 -> oauth2.jwt(
+                                                jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthorityPrefix(""); // We already prefixed with ROLE_ in JwtTokenProvider
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+        @Bean
+        public JwtAuthenticationConverter jwtAuthenticationConverter() {
+                JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+                grantedAuthoritiesConverter.setAuthorityPrefix(""); // We already prefixed with ROLE_ in
+                                                                    // JwtTokenProvider
+                grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
 
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-        return jwtAuthenticationConverter;
-    }
+                JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+                jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+                return jwtAuthenticationConverter;
+        }
 }

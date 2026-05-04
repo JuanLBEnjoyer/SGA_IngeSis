@@ -1,6 +1,5 @@
 package co.edu.uniquindio.proyecto.infrastructure.security;
 
-import co.edu.uniquindio.proyecto.domain.valueobject.RolUsuario;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.entity.UsuarioEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
