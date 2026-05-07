@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.infraestructure.persistence;
+package co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.repositories;
 
 import co.edu.uniquindio.proyecto.domain.entity.Usuario;
 import co.edu.uniquindio.proyecto.domain.exception.ExcepcionDeUsuarioNoEncontrado;

@@ -1,4 +1,5 @@
-package co.edu.uniquindio.proyecto.application.usecase;
+package co.edu.uniquindio.proyecto.application.services.unit;
+import co.edu.uniquindio.proyecto.application.usecase.*;
 
 import co.edu.uniquindio.proyecto.domain.entity.Usuario;
 import co.edu.uniquindio.proyecto.domain.exception.ExcepcionDeReglaDeDominio;

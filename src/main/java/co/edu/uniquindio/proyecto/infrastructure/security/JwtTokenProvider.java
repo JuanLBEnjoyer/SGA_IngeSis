@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
     private final JwtEncoder jwtEncoder;
-    
+
     @Value("${jwt.expiry:3600000}")
     private long expirationTimeMillis;
 
@@ -41,7 +41,7 @@ public class JwtTokenProvider {
                 .expiresAt(expiry)
                 .subject(authentication.getName())
                 .claim("id", userDetails.getId())
-                .claim("roles", scope) // Lo guardamos en el claim "roles"
+                .claim("roles", scope)
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS256).build();

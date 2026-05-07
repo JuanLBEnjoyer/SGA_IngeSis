@@ -1,4 +1,4 @@
-package co.edu.uniquindio.proyecto.infraestructure.rest;
+package co.edu.uniquindio.proyecto.infrastructure.rest.controllers.unit;
 
 import co.edu.uniquindio.proyecto.application.dto.response.*;
 import co.edu.uniquindio.proyecto.application.usecase.*;
