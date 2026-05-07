@@ -42,6 +42,8 @@ public class SecurityConfig {
                                                                 // H2 Console
                                                                 "/h2-console/**")
                                                 .permitAll()
+                                                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/usuarios")
+                                                .permitAll()
                                                 .anyRequest().authenticated())
                                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authenticationProvider(authenticationProvider)
