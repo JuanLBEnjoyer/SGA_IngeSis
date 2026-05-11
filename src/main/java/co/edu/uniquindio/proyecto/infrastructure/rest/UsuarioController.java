@@ -27,6 +27,8 @@ public class UsuarioController {
     private final ObtenerUsuarioPorEmailUseCase obtenerUsuarioPorEmailUseCase;
     private final UsuarioMapper mapper;
 
+    // POST: /api/usuarios
+
     @PostMapping
     @Operation(summary = "Registrar un nuevo usuario", description = "Crea un nuevo usuario en el sistema. La contraseña se almacena encriptada (BCrypt).")
     @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente")
@@ -41,6 +43,8 @@ public class UsuarioController {
                 request.rol());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    // GET: /api/usuarios/me
 
     @GetMapping("/me")
     @Operation(summary = "Obtener perfil del usuario", description = "Retorna la información del usuario actualmente autenticado.")

@@ -6,4 +6,8 @@ public class ExcepcionDeUsuarioNoEncontrado extends RuntimeException {
     public ExcepcionDeUsuarioNoEncontrado(Documento documento) {
         super("No se encontró un usuario con el documento: " + documento.numero());
     }
+
+    public ExcepcionDeUsuarioNoEncontrado(String mensaje) {
+        super(mensaje);
+    }
 }

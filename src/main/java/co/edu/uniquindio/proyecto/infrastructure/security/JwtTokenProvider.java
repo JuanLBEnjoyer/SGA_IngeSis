@@ -33,14 +33,18 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
 
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Object principal = authentication.getPrincipal();
+        String userId = "";
+        if (principal instanceof CustomUserDetails userDetails) {
+            userId = userDetails.getId();
+        }
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("proyecto-uniquindio")
                 .issuedAt(now)
                 .expiresAt(expiry)
                 .subject(authentication.getName())
-                .claim("id", userDetails.getId())
+                .claim("id", userId)
                 .claim("roles", scope)
                 .build();
 

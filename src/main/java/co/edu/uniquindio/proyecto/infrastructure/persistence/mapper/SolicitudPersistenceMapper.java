@@ -15,9 +15,8 @@ import java.util.stream.Collectors;
 /**
  * Mapper de persistencia entre la entidad de DOMINIO y la entidad JPA.
  *
- * Enfoque híbrido:
- * - Domain → Entity: MapStruct genera la implementación automáticamente.
- * - Entity → Domain: método manual porque requiere:
+ * Domain → Entity: MapStruct genera la implementación automáticamente.
+ * Entity → Domain: método manual porque requiere:
  * 1. Buscar Usuario en el repositorio
  * 2. Reconstruir Value Objects (CodigoSolicitud, Documento)
  * 3. Reconstruir el historial desde los embeddables

@@ -1,6 +1,5 @@
 package co.edu.uniquindio.proyecto.infrastructure.config.setup.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -9,12 +8,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class LoginIntegrationTestUtil {
 
-    public static String obtenerTokenIntegro(String correo, String contrasenaPlana, MockMvc mvc, ObjectMapper objMapper) throws Exception {
+    public static String obtenerTokenIntegro(String correo, String contrasenaPlana, MockMvc mvc) throws Exception {
         String req = String.format("{\"email\":\"%s\",\"password\":\"%s\"}", correo, contrasenaPlana);
 
         var result = mvc.perform(post("/api/auth/login")
-                        .contentType("application/json")
-                        .content(req))
+                .contentType("application/json")
+                .content(req))
                 .andExpect(status().isOk())
                 .andReturn();
 

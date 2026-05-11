@@ -4,7 +4,6 @@ import co.edu.uniquindio.proyecto.infrastructure.config.setup.test.LoginIntegrat
 import co.edu.uniquindio.proyecto.infrastructure.config.setup.test.UsuarioTestDataLoader;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.entity.UsuarioEntity;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.jpa.UsuarioJpaDataRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +22,6 @@ public class IntegracionEndToEndTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objMapper = new ObjectMapper();
-
     @Autowired
     private UsuarioJpaDataRepository repositorioreal;
 
@@ -42,7 +39,7 @@ public class IntegracionEndToEndTest {
         String tokenVivo = LoginIntegrationTestUtil.obtenerTokenIntegro(
                 semillaGuardada.getEmail(),
                 "adminpass", // Contraseña nativa pre-encriptada
-                mockMvc, objMapper);
+                mockMvc);
 
         // 2. Comisionamos Postman simulado atacando endpoints duros (/api/usuarios/me)
         mockMvc.perform(get("/api/usuarios/me")

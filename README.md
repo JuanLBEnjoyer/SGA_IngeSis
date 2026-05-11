@@ -23,7 +23,10 @@ Sistema para la gestión de solicitudes académicas del Programa de Ingenieria d
 El proyecto sigue una arquitectura limpia basada en el Diseño Guiado por el Dominio (DDD), separando las capas de dominio, aplicación e infraestructura.
 
 ## Funcionalidades Principales
-- **Autenticación (JWT):** Gestión de roles (ESTUDIANTE, DOCENTE, ADMINISTRATIVO, DIRECTIVO).
+- **Gestión de Usuarios:**
+  - Registro público de nuevos usuarios con cifrado de contraseña (BCrypt).
+  - Consulta del perfil de usuario autenticado.
+- **Autenticación (JWT):** Gestión de seguridad robusta usando OAuth2 Resource Server con validación de roles (ESTUDIANTE, DOCENTE, ADMINISTRATIVO, DIRECTIVO).
 - **Gestión de Solicitudes:**
   - Registro de nuevas solicitudes.
   - Clasificación por prioridad con justificación.
@@ -32,9 +35,16 @@ El proyecto sigue una arquitectura limpia basada en el Diseño Guiado por el Dom
 - **Consultas con Paginación:** Listado de solicitudes utilizando parámetros `page`, `size` y `sort`.
 - **Integridad de Datos:** Comprobación transaccional y patrón *Upsert* implementado en la persistencia.
 
+## Arquitectura de Pruebas (Alineada a la Guía 13)
+El proyecto cuenta con una cobertura de pruebas exhaustiva que sigue estrictos estándares académicos y de la industria:
+- **Pruebas de Repositorio (`@DataJpaTest`):** Verificación directa contra H2 en memoria con aislamiento total entre pruebas (`spring.sql.init.mode=never` y esquemas `create-drop`).
+- **Pruebas Unitarias de Negocio:** Validación de la lógica en los Casos de Uso mediante *Mockito*.
+- **Pruebas de Controladores (`@WebMvcTest`):** Verificación de las capas de infraestructura REST con usuarios simulados (`@WithMockUser`).
+- **Pruebas End-to-End (`@SpringBootTest`):** Pruebas de integración total que levantan el contexto de Spring, siembran la BD mediante fábricas (`TestDataLoaders`), ejecutan peticiones de *login real* extrayendo el JWT y prueban los endpoints securizados simulando un entorno de producción.
+
 ## Documentación de la API (Swagger UI)
 La documentación completa e interactiva de la API (estándar OpenAPI) está disponible al ejecutar el proyecto, accediendo a:
 - [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 - JSON de la API: [http://localhost:8080/api-docs](http://localhost:8080/api-docs)
 
-> **Importante:** La mayoría de los *endpoints* están asegurados. Para interactuar con ellos, primero se debe realizar el login en `/api/auth/login` para recibir un token JWT y configurarlo en la plataforma de Swagger.
+> **Importante:** La mayoría de los *endpoints* están asegurados. Para interactuar con ellos, primero se debe realizar el login en `/api/auth/login` para recibir un token JWT y configurarlo en la plataforma de Swagger. Además, el contrato completo de la API se encuentra en `docs/api/openapi.yaml`.

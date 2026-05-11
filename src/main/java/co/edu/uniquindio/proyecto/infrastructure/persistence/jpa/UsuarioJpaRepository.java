@@ -9,10 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * ADAPTADOR: Implementa UsuarioRepository del dominio usando H2 + Spring Data
- * JPA.
- */
 @Repository
 @Transactional
 @RequiredArgsConstructor
@@ -35,13 +31,12 @@ public class UsuarioJpaRepository implements UsuarioRepository {
         @Override
         public void guardar(Usuario usuario, String passwordEncriptado) {
                 var entity = mapper.toEntity(usuario);
-                
+
                 if (passwordEncriptado != null) {
                         entity.setPassword(passwordEncriptado);
                 }
-                
                 // Upsert: si ya existe un usuario con ese documento, reusar su ID
-                // para que JPA haga UPDATE en lugar de INSERT (evita violar UNIQUE).
+                // para que JPA haga UPDATE en lugar de INSERT.
                 dataRepository.findByNumeroDocumentoAndTipoDocumento(
                                 usuario.getDocumento().numero(),
                                 usuario.getDocumento().tipo().name()).ifPresent(existing -> {
@@ -58,6 +53,7 @@ public class UsuarioJpaRepository implements UsuarioRepository {
         public Usuario obtenerPorEmail(String email) {
                 return dataRepository.findByEmail(email)
                                 .map(mapper::toDomain)
-                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con email: " + email));
+                                .orElseThrow(() -> new ExcepcionDeUsuarioNoEncontrado(
+                                                "Usuario no encontrado con email: " + email));
         }
 }
