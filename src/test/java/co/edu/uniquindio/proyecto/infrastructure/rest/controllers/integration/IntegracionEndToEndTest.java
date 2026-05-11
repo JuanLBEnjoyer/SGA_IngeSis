@@ -37,17 +37,16 @@ public class IntegracionEndToEndTest {
     }
 
     @Test
-    void testTravesiaCompletaDePeticionAEndpointSeguro() throws Exception {
+    void testCompletoDePeticionAEndpointSeguro() throws Exception {
         // 1. Efectuamos el puente real del log-in
         String tokenVivo = LoginIntegrationTestUtil.obtenerTokenIntegro(
                 semillaGuardada.getEmail(),
                 "adminpass", // Contraseña nativa pre-encriptada
-                mockMvc, objMapper
-        );
+                mockMvc, objMapper);
 
         // 2. Comisionamos Postman simulado atacando endpoints duros (/api/usuarios/me)
         mockMvc.perform(get("/api/usuarios/me")
-                        .header("Authorization", "Bearer " + tokenVivo))
+                .header("Authorization", "Bearer " + tokenVivo))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("admin@uniquindio.edu.co"));
     }

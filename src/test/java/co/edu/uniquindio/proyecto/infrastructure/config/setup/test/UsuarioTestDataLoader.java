@@ -2,11 +2,12 @@ package co.edu.uniquindio.proyecto.infrastructure.config.setup.test;
 
 import co.edu.uniquindio.proyecto.domain.valueobject.RolUsuario;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.entity.UsuarioEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class UsuarioTestDataLoader {
 
-    public static final PasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+    public static final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public static UsuarioEntity usuarioAdminBase() {
         UsuarioEntity admin = new UsuarioEntity();

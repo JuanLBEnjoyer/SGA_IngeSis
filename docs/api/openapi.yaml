@@ -36,6 +36,8 @@ servers:
 tags:
   - name: Autenticación
     description: Obtención de token JWT
+  - name: Usuarios
+    description: Gestión de usuarios del sistema
   - name: Solicitudes
     description: Gestión del ciclo de vida completo de una solicitud académica
 
@@ -77,6 +79,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/usuarios:
+    post:
+      tags:
+        - Usuarios
+      summary: Registrar un nuevo usuario
+      description: |
+        Crea un nuevo usuario en el sistema. La contraseña se almacena encriptada (BCrypt).
+        No requiere autenticación.
+      operationId: registrarUsuario
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrarUsuarioRequest'
+            example:
+              numeroDocumento: "1094123456"
+              tipoDocumento: CEDULA
+              nombre: "Juan Perez"
+              email: "juanperez@uniquindio.edu.co"
+              password: "secreta_password"
+              rol: ESTUDIANTE
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+        '400':
+          description: Datos de entrada inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorValidacionResponse'
+
+  /api/usuarios/me:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener perfil del usuario
+      description: Retorna la información del usuario actualmente autenticado (basado en el JWT).
+      operationId: obtenerPerfil
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioDetalleResponse'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
 
   /api/solicitudes:
     post:
@@ -594,6 +648,47 @@ components:
         token:
           type: string
           description: Token JWT para incluir en el header Authorization
+
+    RegistrarUsuarioRequest:
+      type: object
+      required:
+        - numeroDocumento
+        - tipoDocumento
+        - nombre
+        - email
+        - password
+        - rol
+      properties:
+        numeroDocumento:
+          type: string
+        tipoDocumento:
+          $ref: '#/components/schemas/TipoDeDocumento'
+        nombre:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
+
+    UsuarioDetalleResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        numeroDocumento:
+          type: string
+        tipoDocumento:
+          type: string
+        nombre:
+          type: string
+        email:
+          type: string
+        rol:
+          $ref: '#/components/schemas/RolUsuario'
 
     # ── Solicitudes ────────────────────────────────────────────────────────────
 
