@@ -35,7 +35,7 @@ El proyecto sigue una arquitectura limpia basada en el Diseño Guiado por el Dom
 - **Consultas con Paginación:** Listado de solicitudes utilizando parámetros `page`, `size` y `sort`.
 - **Integridad de Datos:** Comprobación transaccional y patrón *Upsert* implementado en la persistencia.
 
-## Arquitectura de Pruebas (Alineada a la Guía 13)
+## Arquitectura de Pruebas
 El proyecto cuenta con una cobertura de pruebas exhaustiva que sigue estrictos estándares académicos y de la industria:
 - **Pruebas de Repositorio (`@DataJpaTest`):** Verificación directa contra H2 en memoria con aislamiento total entre pruebas (`spring.sql.init.mode=never` y esquemas `create-drop`).
 - **Pruebas Unitarias de Negocio:** Validación de la lógica en los Casos de Uso mediante *Mockito*.
