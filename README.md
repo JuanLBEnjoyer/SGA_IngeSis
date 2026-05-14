@@ -1,4 +1,4 @@
-# Proyecto
+# Sistema de Gestion Academica
 
 ## Descripción
 Sistema para la gestión de solicitudes académicas del Programa de Ingenieria de Sistemas y Computacion
