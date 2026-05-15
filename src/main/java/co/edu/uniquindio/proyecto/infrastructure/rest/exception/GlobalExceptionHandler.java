@@ -58,6 +58,13 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
 
+    // ── Credenciales Invalidas → 401 ──────────────────────────────────────────
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthenticationException(
+            org.springframework.security.core.AuthenticationException ex, WebRequest request) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, "Credenciales inválidas. Verifique su correo o contraseña.", request);
+    }
+
     // ── Cualquier otra excepción no controlada → 500 ──────────────────────────
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(
