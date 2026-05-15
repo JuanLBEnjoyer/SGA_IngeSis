@@ -88,4 +88,11 @@ public class SolicitudJpaRepository implements SolicitudRepository {
                 .map(entity -> mapper.toDomain(entity, usuarioRepository));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Solicitud> obtenerPorFiltrosYSolicitante(EstadoDeSolicitud estado, TipoDeSolicitud tipo,
+            PrioridadDeSolicitud prioridad, String documentoResponsable, String solicitanteDocumento, Pageable pageable) {
+        return dataRepository.findByFiltrosAndSolicitante(estado, tipo, prioridad, documentoResponsable, solicitanteDocumento, pageable)
+                .map(entity -> mapper.toDomain(entity, usuarioRepository));
+    }
 }

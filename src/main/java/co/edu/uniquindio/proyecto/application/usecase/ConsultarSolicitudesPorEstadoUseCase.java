@@ -26,7 +26,7 @@ public class ConsultarSolicitudesPorEstadoUseCase {
             return solicitudRepository.obtenerPorFiltros(estado, tipo, prioridad, documentoResponsable, pageable);
         } else {
             Usuario usuario = usuarioRepository.obtenerPorEmail(email);
-            return solicitudRepository.obtenerPorEstadoYSolicitante(estado,
+            return solicitudRepository.obtenerPorFiltrosYSolicitante(estado, tipo, prioridad, documentoResponsable,
                     usuario.getDocumento().numero(), pageable);
         }
     }

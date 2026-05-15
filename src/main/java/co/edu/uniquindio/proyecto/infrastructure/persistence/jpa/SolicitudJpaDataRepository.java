@@ -84,4 +84,18 @@ interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long
             @Param("prioridad") PrioridadDeSolicitud prioridad,
             @Param("responsable") String responsable,
             Pageable pageable);
+
+    @Query("SELECT s FROM SolicitudEntity s WHERE " +
+            "s.solicitanteDocumento = :solicitante AND " +
+            "(:estado IS NULL OR s.estado = :estado) AND " +
+            "(:tipo IS NULL OR s.tipo = :tipo) AND " +
+            "(:prioridad IS NULL OR s.prioridad = :prioridad) AND " +
+            "(:responsable IS NULL OR s.responsableDocumento = :responsable)")
+    Page<SolicitudEntity> findByFiltrosAndSolicitante(
+            @Param("estado") EstadoDeSolicitud estado,
+            @Param("tipo") TipoDeSolicitud tipo,
+            @Param("prioridad") PrioridadDeSolicitud prioridad,
+            @Param("responsable") String responsable,
+            @Param("solicitante") String solicitante,
+            Pageable pageable);
 }

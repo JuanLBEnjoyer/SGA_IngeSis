@@ -20,4 +20,7 @@ public interface SolicitudRepository {
 
     Page<Solicitud> obtenerPorFiltros(EstadoDeSolicitud estado, TipoDeSolicitud tipo,
             PrioridadDeSolicitud prioridad, String documentoResponsable, Pageable pageable);
+
+    Page<Solicitud> obtenerPorFiltrosYSolicitante(EstadoDeSolicitud estado, TipoDeSolicitud tipo,
+            PrioridadDeSolicitud prioridad, String documentoResponsable, String solicitanteDocumento, Pageable pageable);
 }
