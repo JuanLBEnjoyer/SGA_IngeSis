@@ -6,6 +6,8 @@ import co.edu.uniquindio.proyecto.domain.repository.SolicitudRepository;
 import co.edu.uniquindio.proyecto.domain.repository.UsuarioRepository;
 import co.edu.uniquindio.proyecto.domain.valueobject.CodigoSolicitud;
 import co.edu.uniquindio.proyecto.domain.valueobject.EstadoDeSolicitud;
+import co.edu.uniquindio.proyecto.domain.valueobject.PrioridadDeSolicitud;
+import co.edu.uniquindio.proyecto.domain.valueobject.TipoDeSolicitud;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.entity.SolicitudEntity;
 import co.edu.uniquindio.proyecto.infrastructure.persistence.mapper.SolicitudPersistenceMapper;
 import lombok.RequiredArgsConstructor;
@@ -77,4 +79,13 @@ public class SolicitudJpaRepository implements SolicitudRepository {
         return dataRepository.findBySolicitanteDocumentoAndEstado(documento, estado, pageable)
                 .map(entity -> mapper.toDomain(entity, usuarioRepository));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Solicitud> obtenerPorFiltros(EstadoDeSolicitud estado, TipoDeSolicitud tipo,
+            PrioridadDeSolicitud prioridad, String documentoResponsable, Pageable pageable) {
+        return dataRepository.findByFiltros(estado, tipo, prioridad, documentoResponsable, pageable)
+                .map(entity -> mapper.toDomain(entity, usuarioRepository));
+    }
+
 }

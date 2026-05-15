@@ -23,7 +23,8 @@ interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long
 
     Page<SolicitudEntity> findBySolicitanteDocumento(String documento, Pageable pageable);
 
-    Page<SolicitudEntity> findBySolicitanteDocumentoAndEstado(String documento, EstadoDeSolicitud estado, Pageable pageable);
+    Page<SolicitudEntity> findBySolicitanteDocumentoAndEstado(String documento, EstadoDeSolicitud estado,
+            Pageable pageable);
 
     List<SolicitudEntity> findBySolicitanteDocumento(String documento);
 
@@ -71,4 +72,16 @@ interface SolicitudJpaDataRepository extends JpaRepository<SolicitudEntity, Long
     List<Object[]> countAgrupadoPorEstadoNativo();
 
     Page<SolicitudEntity> findByEstadoNot(EstadoDeSolicitud estado, Pageable pageable);
+
+    @Query("SELECT s FROM SolicitudEntity s WHERE " +
+            "(:estado IS NULL OR s.estado = :estado) AND " +
+            "(:tipo IS NULL OR s.tipo = :tipo) AND " +
+            "(:prioridad IS NULL OR s.prioridad = :prioridad) AND " +
+            "(:responsable IS NULL OR s.responsableDocumento = :responsable)")
+    Page<SolicitudEntity> findByFiltros(
+            @Param("estado") EstadoDeSolicitud estado,
+            @Param("tipo") TipoDeSolicitud tipo,
+            @Param("prioridad") PrioridadDeSolicitud prioridad,
+            @Param("responsable") String responsable,
+            Pageable pageable);
 }

@@ -19,12 +19,15 @@ public class ConsultarSolicitudesPorEstadoUseCase {
     private final UsuarioRepository usuarioRepository;
 
     @Transactional(readOnly = true)
-    public Page<Solicitud> ejecutar(EstadoDeSolicitud estado, Pageable pageable, String email, boolean maxJerarquia) {
+    public Page<Solicitud> ejecutar(EstadoDeSolicitud estado, TipoDeSolicitud tipo,
+            PrioridadDeSolicitud prioridad, String documentoResponsable,
+            Pageable pageable, String email, boolean maxJerarquia) {
         if (maxJerarquia) {
-            return solicitudRepository.obtenerPorEstado(estado, pageable);
+            return solicitudRepository.obtenerPorFiltros(estado, tipo, prioridad, documentoResponsable, pageable);
         } else {
             Usuario usuario = usuarioRepository.obtenerPorEmail(email);
-            return solicitudRepository.obtenerPorEstadoYSolicitante(estado, usuario.getDocumento().numero(), pageable);
+            return solicitudRepository.obtenerPorEstadoYSolicitante(estado,
+                    usuario.getDocumento().numero(), pageable);
         }
     }
 }

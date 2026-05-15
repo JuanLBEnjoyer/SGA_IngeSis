@@ -17,4 +17,7 @@ public interface SolicitudRepository {
     Page<Solicitud> obtenerPorEstadoYSolicitante(EstadoDeSolicitud estado, String documento, Pageable pageable);
 
     Page<Solicitud> obtenerExcluyendoEstado(EstadoDeSolicitud estado, Pageable pageable);
+
+    Page<Solicitud> obtenerPorFiltros(EstadoDeSolicitud estado, TipoDeSolicitud tipo,
+            PrioridadDeSolicitud prioridad, String documentoResponsable, Pageable pageable);
 }

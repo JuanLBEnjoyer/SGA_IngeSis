@@ -171,7 +171,7 @@ class SolicitudControllerTest {
         @Test
         @WithMockUser(username = "admin@uniquindio.edu.co", roles = "ADMINISTRATIVO")
         void debeRetornarListaVaciaCuandoNoHaySolicitudes() throws Exception {
-                when(consultarPorEstadoUseCase.ejecutar(isNull(), any(Pageable.class), eq("admin@uniquindio.edu.co"), eq(true))).thenReturn(Page.empty());
+                when(consultarPorEstadoUseCase.ejecutar(isNull(), isNull(), isNull(), isNull(), any(Pageable.class), eq("admin@uniquindio.edu.co"), eq(true))).thenReturn(Page.empty());
 
                 mockMvc.perform(get("/api/solicitudes"))
                                 .andExpect(status().isOk())
@@ -181,14 +181,14 @@ class SolicitudControllerTest {
         @Test
         @WithMockUser(username = "admin@uniquindio.edu.co", roles = "ADMINISTRATIVO")
         void debeRetornarListaFiltradaPorEstado() throws Exception {
-                when(consultarPorEstadoUseCase.ejecutar(eq(EstadoDeSolicitud.REGISTRADA), any(Pageable.class), eq("admin@uniquindio.edu.co"), eq(true)))
+                when(consultarPorEstadoUseCase.ejecutar(eq(EstadoDeSolicitud.REGISTRADA), isNull(), isNull(), isNull(), any(Pageable.class), eq("admin@uniquindio.edu.co"), eq(true)))
                                 .thenReturn(Page.empty());
 
                 mockMvc.perform(get("/api/solicitudes")
                                 .param("estado", "REGISTRADA"))
                                 .andExpect(status().isOk());
 
-                verify(consultarPorEstadoUseCase).ejecutar(eq(EstadoDeSolicitud.REGISTRADA), any(Pageable.class), eq("admin@uniquindio.edu.co"), eq(true));
+                verify(consultarPorEstadoUseCase).ejecutar(eq(EstadoDeSolicitud.REGISTRADA), isNull(), isNull(), isNull(), any(Pageable.class), eq("admin@uniquindio.edu.co"), eq(true));
         }
 
         // ── GET /api/solicitudes/{codigo} ─────────────────────────────────────────

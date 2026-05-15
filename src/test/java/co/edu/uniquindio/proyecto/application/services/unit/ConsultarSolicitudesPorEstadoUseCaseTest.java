@@ -50,14 +50,14 @@ class ConsultarSolicitudesPorEstadoUseCaseTest {
 
     @Test
     void debeConsultarTodasLasSolicitudesSiMaxJerarquiaEsVerdadero() {
-        when(solicitudRepository.obtenerPorEstado(EstadoDeSolicitud.REGISTRADA, pageable))
+        when(solicitudRepository.obtenerPorFiltros(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable))
                 .thenReturn(dummyPage);
 
-        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, pageable, "admin@uniquindio.edu.co", true);
+        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable, "admin@uniquindio.edu.co", true);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(solicitudRepository, times(1)).obtenerPorEstado(EstadoDeSolicitud.REGISTRADA, pageable);
+        verify(solicitudRepository, times(1)).obtenerPorFiltros(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable);
         verify(usuarioRepository, never()).obtenerPorEmail(anyString());
         verify(solicitudRepository, never()).obtenerPorEstadoYSolicitante(any(), anyString(), any());
     }
@@ -70,7 +70,7 @@ class ConsultarSolicitudesPorEstadoUseCaseTest {
         when(solicitudRepository.obtenerPorEstadoYSolicitante(EstadoDeSolicitud.REGISTRADA, "12345", pageable))
                 .thenReturn(dummyPage);
 
-        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, pageable, "estudiante@uniquindio.edu.co", false);
+        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable, "estudiante@uniquindio.edu.co", false);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());

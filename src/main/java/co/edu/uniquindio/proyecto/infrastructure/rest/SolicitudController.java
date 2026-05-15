@@ -5,6 +5,8 @@ import co.edu.uniquindio.proyecto.application.dto.response.*;
 import co.edu.uniquindio.proyecto.application.usecase.*;
 import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.valueobject.EstadoDeSolicitud;
+import co.edu.uniquindio.proyecto.domain.valueobject.PrioridadDeSolicitud;
+import co.edu.uniquindio.proyecto.domain.valueobject.TipoDeSolicitud;
 import co.edu.uniquindio.proyecto.infrastructure.rest.mapper.SolicitudMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -81,6 +84,9 @@ public class SolicitudController {
         @ApiResponse(responseCode = "200", description = "Página obtenida exitosamente")
         public ResponseEntity<Page<SolicitudResumenResponse>> listarSolicitudesPaginadas(
                         @RequestParam(required = false) EstadoDeSolicitud estado,
+                        @RequestParam(required = false) TipoDeSolicitud tipo,
+                        @RequestParam(required = false) PrioridadDeSolicitud prioridad,
+                        @RequestParam(required = false) String documentoResponsable,
                         @PageableDefault(size = 10, sort = "codigo") Pageable pageable) {
 
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -91,7 +97,8 @@ public class SolicitudController {
                                                 || a.getAuthority().equals("ADMINISTRATIVO"));
                 String email = authentication.getName();
 
-                Page<Solicitud> pagina = consultarPorEstadoUseCase.ejecutar(estado, pageable, email, esJerarquiaAlta);
+                Page<Solicitud> pagina = consultarPorEstadoUseCase.ejecutar(
+                                estado, tipo, prioridad, documentoResponsable, pageable, email, esJerarquiaAlta);
                 return ResponseEntity.ok(pagina.map(mapper::toResumenResponse));
         }
 
@@ -109,7 +116,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/clasificar ──────────────────────────────
         @PutMapping("/{codigo}/clasificar")
-        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('DOCENTE', 'ADMINISTRATIVO', 'DIRECTIVO')")
+        @PreAuthorize("hasAnyRole('DOCENTE', 'ADMINISTRATIVO', 'DIRECTIVO')")
         @Operation(summary = "Clasificar una solicitud", description = "Asigna una prioridad a la solicitud y la pasa a estado CLASIFICADA. "
                         +
                         "Precondición: la solicitud debe estar en estado REGISTRADA.")
@@ -127,7 +134,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/asignar ─────────────────────────────────
         @PutMapping("/{codigo}/asignar")
-        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMINISTRATIVO', 'DIRECTIVO')")
+        @PreAuthorize("hasAnyRole('ADMINISTRATIVO', 'DIRECTIVO')")
         @Operation(summary = "Asignar responsable a una solicitud", description = "Designa un usuario como responsable. "
                         +
                         "Precondición: solicitud en estado CLASIFICADA. " +
@@ -149,7 +156,7 @@ public class SolicitudController {
 
         // ── PATCH /api/solicitudes/{codigo}/atender ───────────────────────────────
         @PatchMapping("/{codigo}/atender")
-        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('DOCENTE', 'ADMINISTRATIVO', 'DIRECTIVO')")
+        @PreAuthorize("hasAnyRole('DOCENTE', 'ADMINISTRATIVO', 'DIRECTIVO')")
         @Operation(summary = "Marcar una solicitud como atendida", description = "Registra que la solicitud fue atendida. "
                         +
                         "Precondición: solicitud en estado EN_ATENCION.")
@@ -167,7 +174,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/cerrar ──────────────────────────────────
         @PutMapping("/{codigo}/cerrar")
-        @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('DIRECTIVO')")
+        @PreAuthorize("hasAnyRole('DIRECTIVO')")
         @Operation(summary = "Cerrar una solicitud", description = "Finaliza el ciclo de vida de la solicitud. " +
                         "Precondición: solicitud en estado ATENDIDA.")
         @ApiResponse(responseCode = "200", description = "Solicitud cerrada exitosamente")
