@@ -12,6 +12,8 @@ info:
     ## Ciclo de vida de una Solicitud
     ```
     REGISTRADA → CLASIFICADA → EN_ATENCION → ATENDIDA → CERRADA
+                                                  ↑          |
+                                                  └─(rechaza)─┘
     ```
     ## Autenticación
     Todos los endpoints requieren un token JWT en el header `Authorization`.
@@ -19,12 +21,13 @@ info:
 
     Obtén tu token en `POST /api/auth/login` con email y password.
 
-    Los roles disponibles y sus permisos son:
-    - **ESTUDIANTE** → puede crear solicitudes y consultar las propias
-    - **DOCENTE / ADMINISTRATIVO** → puede clasificar, asignar y atender
-    - **DIRECTIVO** → acceso completo, incluyendo cerrar solicitudes
+    ## Jerarquía de roles
+    - **ESTUDIANTE** → Crea solicitudes, consulta las propias, acepta o rechaza la solución
+    - **ADMINISTRATIVO** → Visualiza todas las solicitudes, clasifica y asigna responsable
+    - **DOCENTE** → Atiende solicitudes que le fueron asignadas, consulta solo las asignadas
+    - **DIRECTIVO** → Atiende solicitudes que le fueron asignadas, consulta solo las asignadas
 
-  version: 2.0.0
+  version: 3.0.0
   contact:
     name: Programa de Ingeniería de Sistemas
     email: sistemas@uniquindio.edu.co
@@ -117,7 +120,7 @@ paths:
     get:
       tags:
         - Usuarios
-      summary: Obtener perfil del usuario
+      summary: Obtener perfil del usuario autenticado
       description: Retorna la información del usuario actualmente autenticado (basado en el JWT).
       operationId: obtenerPerfil
       responses:
@@ -129,6 +132,33 @@ paths:
                 $ref: '#/components/schemas/UsuarioDetalleResponse'
         '401':
           $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/usuarios/responsables:
+    get:
+      tags:
+        - Usuarios
+      summary: Obtener lista de responsables disponibles
+      description: |
+        Retorna la lista de todos los usuarios con rol `DOCENTE` o `DIRECTIVO`
+        que pueden ser asignados como responsables de una solicitud.
+
+        **Roles permitidos:** ADMINISTRATIVO
+      operationId: obtenerResponsables
+      responses:
+        '200':
+          description: Lista de responsables obtenida exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsuarioResumenResponse'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
         '500':
           $ref: '#/components/responses/Error500'
 
@@ -144,7 +174,7 @@ paths:
         El código se genera automáticamente — no debe enviarse en el body.
         El solicitante se identifica por número y tipo de documento, ambos obligatorios.
 
-        **Roles permitidos:** ESTUDIANTE, DOCENTE, ADMINISTRATIVO, DIRECTIVO
+        **Roles permitidos:** ESTUDIANTE
       operationId: crearSolicitud
       requestBody:
         required: true
@@ -204,13 +234,20 @@ paths:
         - Solicitudes
       summary: Listar solicitudes paginadas
       description: |
-        Obtiene la lista paginada de solicitudes. Se puede filtrar por estado.
+        Obtiene la lista paginada de solicitudes. Los resultados se filtran automáticamente
+        según el rol del usuario autenticado:
+        - **ADMINISTRATIVO** → Ve todas las solicitudes del sistema
+        - **DOCENTE / DIRECTIVO** → Ve solo las solicitudes que le fueron asignadas
+        - **ESTUDIANTE** → Ve solo las solicitudes que él mismo creó
+
         Mapea a: `ConsultarSolicitudesPorEstadoUseCase`
 
         **Paginación:** usa los parámetros `page`, `size` y `sort`.
         Ejemplo: `GET /api/solicitudes?estado=REGISTRADA&page=0&size=5&sort=codigo,asc`
 
-        **Roles permitidos:** DOCENTE, ADMINISTRATIVO, DIRECTIVO
+        **Filtros adicionales disponibles:** `tipo`, `prioridad`, `documentoResponsable`
+
+        **Roles permitidos:** ESTUDIANTE, DOCENTE, ADMINISTRATIVO, DIRECTIVO
       operationId: listarSolicitudes
       parameters:
         - name: estado
@@ -219,6 +256,24 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/EstadoDeSolicitud'
+        - name: tipo
+          in: query
+          description: Filtrar por tipo de solicitud
+          required: false
+          schema:
+            $ref: '#/components/schemas/TipoDeSolicitud'
+        - name: prioridad
+          in: query
+          description: Filtrar por prioridad asignada
+          required: false
+          schema:
+            $ref: '#/components/schemas/PrioridadDeSolicitud'
+        - name: documentoResponsable
+          in: query
+          description: Filtrar por documento del responsable asignado
+          required: false
+          schema:
+            type: string
         - name: page
           in: query
           description: Número de página (empieza en 0)
@@ -301,13 +356,16 @@ paths:
         - Solicitudes
       summary: Clasificar una solicitud
       description: |
-        Asigna una prioridad a la solicitud y la pasa a estado **CLASIFICADA**.
+        Asigna una prioridad y justificación a la solicitud y la pasa a estado **CLASIFICADA**.
         Mapea a: `ClasificarSolicitudUseCase`
 
         **Precondiciones:**
         - La solicitud debe estar en estado `REGISTRADA`
 
-        **Roles permitidos:** DOCENTE, ADMINISTRATIVO, DIRECTIVO
+        > **Nota:** En el flujo normal, el Administrativo realiza la clasificación
+        > y la asignación de responsable en un único paso desde la interfaz.
+
+        **Roles permitidos:** ADMINISTRATIVO
       operationId: clasificarSolicitud
       parameters:
         - $ref: '#/components/parameters/CodigoSolicitud'
@@ -361,11 +419,14 @@ paths:
         **Precondiciones:**
         - La solicitud debe estar en estado `CLASIFICADA`
         - El responsable no puede tener rol `ESTUDIANTE`
+        - El responsable debe ser DOCENTE o DIRECTIVO
 
         Se requiere número y tipo de documento del responsable porque ambos
         forman la identidad completa del Documento en el dominio.
+        Se recomienda usar `GET /api/usuarios/responsables` para obtener la lista
+        de responsables disponibles.
 
-        **Roles permitidos:** ADMINISTRATIVO, DIRECTIVO
+        **Roles permitidos:** ADMINISTRATIVO
       operationId: asignarResponsable
       parameters:
         - $ref: '#/components/parameters/CodigoSolicitud'
@@ -422,13 +483,18 @@ paths:
         - Solicitudes
       summary: Marcar una solicitud como atendida
       description: |
-        Registra que la solicitud fue atendida. Pasa a estado **ATENDIDA**.
+        El responsable asignado registra la solución ofrecida con una observación
+        obligatoria. La solicitud pasa a estado **ATENDIDA**.
         Mapea a: `AtenderSolicitudUseCase`
 
         **Precondiciones:**
         - La solicitud debe estar en estado `EN_ATENCION`
+        - La observación es obligatoria
 
-        **Roles permitidos:** DOCENTE, ADMINISTRATIVO, DIRECTIVO
+        Tras esta acción, el **Estudiante** decide si acepta la solución (cierra)
+        o la rechaza (vuelve a EN_ATENCION).
+
+        **Roles permitidos:** DOCENTE, DIRECTIVO
       operationId: atenderSolicitud
       parameters:
         - $ref: '#/components/parameters/CodigoSolicitud'
@@ -472,15 +538,16 @@ paths:
     put:
       tags:
         - Solicitudes
-      summary: Cerrar una solicitud
+      summary: Aceptar solución y cerrar una solicitud
       description: |
-        Finaliza el ciclo de vida de la solicitud. Pasa a estado **CERRADA** (estado final).
+        El Estudiante acepta la solución ofrecida. Finaliza el ciclo de vida
+        de la solicitud. Pasa a estado **CERRADA** (estado final).
         Mapea a: `CerrarSolicitudUseCase`
 
         **Precondiciones:**
         - La solicitud debe estar en estado `ATENDIDA`
 
-        **Roles permitidos:** ADMINISTRATIVO, DIRECTIVO
+        **Roles permitidos:** ESTUDIANTE
       operationId: cerrarSolicitud
       parameters:
         - $ref: '#/components/parameters/CodigoSolicitud'
@@ -511,6 +578,61 @@ paths:
                 error: "Bad Request"
                 mensaje: "Solo se puede cerrar una solicitud atendida"
                 path: "/api/solicitudes/001/cerrar"
+        '404':
+          $ref: '#/components/responses/Error404Solicitud'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+
+  /api/solicitudes/{codigo}/rechazar:
+    put:
+      tags:
+        - Solicitudes
+      summary: Rechazar la atención y solicitar revisión
+      description: |
+        El Estudiante indica que la solución ofrecida no es satisfactoria.
+        La solicitud regresa al estado **EN_ATENCION** para que el responsable
+        la revise nuevamente.
+        Mapea a: `RechazarAtencionUseCase`
+
+        **Precondiciones:**
+        - La solicitud debe estar en estado `ATENDIDA`
+        - La justificación es obligatoria
+
+        **Roles permitidos:** ESTUDIANTE
+      operationId: rechazarAtencion
+      parameters:
+        - $ref: '#/components/parameters/CodigoSolicitud'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RechazarAtencionRequest'
+            example:
+              justificacion: "La asignatura no fue registrada correctamente, sigue apareciendo el error."
+      responses:
+        '200':
+          description: Revisión solicitada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolicitudDetalleResponse'
+        '400':
+          description: Estado inválido o justificación vacía
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                timestamp: "2024-03-15T10:30:00"
+                status: 400
+                error: "Bad Request"
+                mensaje: "Debe proporcionar una justificación para rechazar la atención"
+                path: "/api/solicitudes/001/rechazar"
         '404':
           $ref: '#/components/responses/Error404Solicitud'
         '401':
@@ -763,7 +885,18 @@ components:
         observacion:
           type: string
           maxLength: 500
-          description: Observación de cierre de la solicitud
+          description: Comentario del Estudiante al aceptar la solución
+
+    RechazarAtencionRequest:
+      type: object
+      required:
+        - justificacion
+      properties:
+        justificacion:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Justificación obligatoria del Estudiante al rechazar la solución
 
     SolicitudDetalleResponse:
       type: object
