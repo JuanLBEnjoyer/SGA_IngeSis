@@ -49,7 +49,7 @@ class CerrarSolicitudUseCaseTest {
 
                 solicitud.clasificar(PrioridadDeSolicitud.ALTO, "Inicio de semestre");
                 solicitud.asignarResponsable(responsable);
-                solicitud.atender();
+                solicitud.atender("Resuelta temporalmente");
                 return solicitud;
         }
 

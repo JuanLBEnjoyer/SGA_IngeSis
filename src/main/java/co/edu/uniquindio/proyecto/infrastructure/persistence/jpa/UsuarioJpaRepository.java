@@ -56,4 +56,16 @@ public class UsuarioJpaRepository implements UsuarioRepository {
                                 .orElseThrow(() -> new ExcepcionDeUsuarioNoEncontrado(
                                                 "Usuario no encontrado con email: " + email));
         }
+
+        @Override
+        @Transactional(readOnly = true)
+        public java.util.List<Usuario> obtenerResponsables() {
+                return dataRepository.findByRolIn(java.util.List.of(
+                        co.edu.uniquindio.proyecto.domain.valueobject.RolUsuario.DOCENTE, 
+                        co.edu.uniquindio.proyecto.domain.valueobject.RolUsuario.DIRECTIVO
+                ))
+                                .stream()
+                                .map(mapper::toDomain)
+                                .toList();
+        }
 }

@@ -11,4 +11,6 @@ public interface UsuarioJpaDataRepository extends JpaRepository<UsuarioEntity, U
     Optional<UsuarioEntity> findByNumeroDocumentoAndTipoDocumento(String numeroDocumento, String tipoDocumento);
 
     Optional<UsuarioEntity> findByEmail(String email);
+
+    java.util.List<UsuarioEntity> findByRolIn(java.util.List<co.edu.uniquindio.proyecto.domain.valueobject.RolUsuario> roles);
 }

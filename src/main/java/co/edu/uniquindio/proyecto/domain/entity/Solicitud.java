@@ -86,12 +86,13 @@ public class Solicitud {
         this.historial.add(new RegistroHistorial("Solicitud asignada a responsable", LocalDateTime.now(), this.estado));
     }
 
-    public void atender() {
+    public void atender(String observacion) {
         if (this.estado != EstadoDeSolicitud.EN_ATENCION) {
             throw new ExcepcionDeReglaDeDominio("Solo se puede atender una solicitud en atencion");
         }
         this.estado = EstadoDeSolicitud.ATENDIDA;
-        this.historial.add(new RegistroHistorial("Solicitud atendida", LocalDateTime.now(), this.estado));
+        String mensaje = observacion != null && !observacion.isBlank() ? "Solicitud atendida: " + observacion : "Solicitud atendida";
+        this.historial.add(new RegistroHistorial(mensaje, LocalDateTime.now(), this.estado));
     }
 
     public void cerrar(String justificacion) {
@@ -99,8 +100,20 @@ public class Solicitud {
             throw new ExcepcionDeReglaDeDominio("Solo se puede cerrar una solicitud atendida");
         }
         this.estado = EstadoDeSolicitud.CERRADA;
+        String mensaje = justificacion != null && !justificacion.isBlank() ? "Solicitud cerrada: " + justificacion : "Solicitud cerrada";
         this.historial
-                .add(new RegistroHistorial("Solicitud cerrada" + justificacion, LocalDateTime.now(), this.estado));
+                .add(new RegistroHistorial(mensaje, LocalDateTime.now(), this.estado));
+    }
+
+    public void rechazarAtencion(String justificacion) {
+        if (this.estado != EstadoDeSolicitud.ATENDIDA) {
+            throw new ExcepcionDeReglaDeDominio("Solo se puede rechazar la atención de una solicitud atendida");
+        }
+        if (justificacion == null || justificacion.isBlank()) {
+            throw new ExcepcionDeReglaDeDominio("Debe proporcionar una justificación para rechazar la atención");
+        }
+        this.estado = EstadoDeSolicitud.EN_ATENCION;
+        this.historial.add(new RegistroHistorial("Atención rechazada por el estudiante: " + justificacion, LocalDateTime.now(), this.estado));
     }
 
 }

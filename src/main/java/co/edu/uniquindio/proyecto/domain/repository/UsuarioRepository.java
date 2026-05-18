@@ -9,4 +9,6 @@ public interface UsuarioRepository {
     void guardar(Usuario usuario, String passwordEncriptado);
 
     Usuario obtenerPorEmail(String email);
+
+    java.util.List<Usuario> obtenerResponsables();
 }

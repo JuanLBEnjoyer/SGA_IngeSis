@@ -49,33 +49,48 @@ class ConsultarSolicitudesPorEstadoUseCaseTest {
     }
 
     @Test
-    void debeConsultarTodasLasSolicitudesSiMaxJerarquiaEsVerdadero() {
+    void debeConsultarTodasLasSolicitudesSiEsAdministrativo() {
+        when(usuarioRepository.obtenerPorEmail("admin@uniquindio.edu.co")).thenReturn(dummyUsuario);
         when(solicitudRepository.obtenerPorFiltros(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable))
                 .thenReturn(dummyPage);
 
-        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable, "admin@uniquindio.edu.co", true);
+        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable, "admin@uniquindio.edu.co", "ROLE_ADMINISTRATIVO");
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         verify(solicitudRepository, times(1)).obtenerPorFiltros(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable);
-        verify(usuarioRepository, never()).obtenerPorEmail(anyString());
         verify(solicitudRepository, never()).obtenerPorEstadoYSolicitante(any(), anyString(), any());
     }
 
     @Test
-    void debeConsultarSoloSolicitudesDelUsuarioSiMaxJerarquiaEsFalso() {
+    void debeConsultarSoloAsignadasSiEsDocenteODirectivo() {
+        Documento doc = new Documento("12345", TipoDeDocumento.CEDULA);
+        when(dummyUsuario.getDocumento()).thenReturn(doc);
+        when(usuarioRepository.obtenerPorEmail("docente@uniquindio.edu.co")).thenReturn(dummyUsuario);
+        when(solicitudRepository.obtenerPorFiltros(EstadoDeSolicitud.REGISTRADA, null, null, "12345", pageable))
+                .thenReturn(dummyPage);
+
+        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable, "docente@uniquindio.edu.co", "ROLE_DOCENTE");
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(solicitudRepository, times(1)).obtenerPorFiltros(EstadoDeSolicitud.REGISTRADA, null, null, "12345", pageable);
+    }
+
+    @Test
+    void debeConsultarSoloSolicitudesCreadasPorElSiEsEstudiante() {
         Documento doc = new Documento("12345", TipoDeDocumento.CEDULA);
         when(dummyUsuario.getDocumento()).thenReturn(doc);
         when(usuarioRepository.obtenerPorEmail("estudiante@uniquindio.edu.co")).thenReturn(dummyUsuario);
-        when(solicitudRepository.obtenerPorEstadoYSolicitante(EstadoDeSolicitud.REGISTRADA, "12345", pageable))
+        when(solicitudRepository.obtenerPorFiltrosYSolicitante(EstadoDeSolicitud.REGISTRADA, null, null, null, "12345", pageable))
                 .thenReturn(dummyPage);
 
-        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable, "estudiante@uniquindio.edu.co", false);
+        Page<Solicitud> result = useCase.ejecutar(EstadoDeSolicitud.REGISTRADA, null, null, null, pageable, "estudiante@uniquindio.edu.co", "ROLE_ESTUDIANTE");
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         verify(usuarioRepository, times(1)).obtenerPorEmail("estudiante@uniquindio.edu.co");
-        verify(solicitudRepository, times(1)).obtenerPorEstadoYSolicitante(EstadoDeSolicitud.REGISTRADA, "12345", pageable);
-        verify(solicitudRepository, never()).obtenerPorEstado(any(), any());
+        verify(solicitudRepository, times(1)).obtenerPorFiltrosYSolicitante(EstadoDeSolicitud.REGISTRADA, null, null, null, "12345", pageable);
+        verify(solicitudRepository, never()).obtenerPorFiltros(any(), any(), any(), any(), any());
     }
 }

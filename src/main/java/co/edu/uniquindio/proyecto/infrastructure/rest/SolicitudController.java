@@ -40,6 +40,7 @@ public class SolicitudController {
         private final AsignarResponsableUseCase asignarResponsableUseCase;
         private final ConsultarSolicitudesPorEstadoUseCase consultarPorEstadoUseCase;
         private final ObtenerSolicitudUseCase obtenerSolicitudUseCase;
+        private final RechazarAtencionUseCase rechazarAtencionUseCase;
         private final SolicitudMapper mapper;
 
         // ── POST /api/solicitudes ─────────────────────────────────────────────────
@@ -90,15 +91,14 @@ public class SolicitudController {
                         @PageableDefault(size = 10, sort = "codigo") Pageable pageable) {
 
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                boolean esJerarquiaAlta = authentication.getAuthorities().stream()
-                                .anyMatch(a -> a.getAuthority().equals("ROLE_DIRECTIVO")
-                                                || a.getAuthority().equals("ROLE_ADMINISTRATIVO")
-                                                || a.getAuthority().equals("DIRECTIVO")
-                                                || a.getAuthority().equals("ADMINISTRATIVO"));
+                String rolUsuario = authentication.getAuthorities().stream()
+                                .map(a -> a.getAuthority())
+                                .findFirst()
+                                .orElse("");
                 String email = authentication.getName();
 
                 Page<Solicitud> pagina = consultarPorEstadoUseCase.ejecutar(
-                                estado, tipo, prioridad, documentoResponsable, pageable, email, esJerarquiaAlta);
+                                estado, tipo, prioridad, documentoResponsable, pageable, email, rolUsuario);
                 return ResponseEntity.ok(pagina.map(mapper::toResumenResponse));
         }
 
@@ -116,7 +116,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/clasificar ──────────────────────────────
         @PutMapping("/{codigo}/clasificar")
-        @PreAuthorize("hasAnyRole('DOCENTE', 'ADMINISTRATIVO', 'DIRECTIVO')")
+        @PreAuthorize("hasAnyRole('ADMINISTRATIVO')")
         @Operation(summary = "Clasificar una solicitud", description = "Asigna una prioridad a la solicitud y la pasa a estado CLASIFICADA. "
                         +
                         "Precondición: la solicitud debe estar en estado REGISTRADA.")
@@ -134,7 +134,7 @@ public class SolicitudController {
 
         // ── PUT /api/solicitudes/{codigo}/asignar ─────────────────────────────────
         @PutMapping("/{codigo}/asignar")
-        @PreAuthorize("hasAnyRole('ADMINISTRATIVO', 'DIRECTIVO')")
+        @PreAuthorize("hasAnyRole('ADMINISTRATIVO')")
         @Operation(summary = "Asignar responsable a una solicitud", description = "Designa un usuario como responsable. "
                         +
                         "Precondición: solicitud en estado CLASIFICADA. " +
@@ -156,7 +156,7 @@ public class SolicitudController {
 
         // ── PATCH /api/solicitudes/{codigo}/atender ───────────────────────────────
         @PatchMapping("/{codigo}/atender")
-        @PreAuthorize("hasAnyRole('DOCENTE', 'ADMINISTRATIVO', 'DIRECTIVO')")
+        @PreAuthorize("hasAnyRole('DOCENTE', 'DIRECTIVO')")
         @Operation(summary = "Marcar una solicitud como atendida", description = "Registra que la solicitud fue atendida. "
                         +
                         "Precondición: solicitud en estado EN_ATENCION.")
@@ -167,14 +167,14 @@ public class SolicitudController {
                         @PathVariable String codigo,
                         @Valid @RequestBody AtenderSolicitudRequest request) {
 
-                atenderSolicitudUseCase.ejecutar(codigo);
+                atenderSolicitudUseCase.ejecutar(codigo, request.observacion());
                 Solicitud solicitud = obtenerSolicitudUseCase.ejecutar(codigo);
                 return ResponseEntity.ok(mapper.toDetalleResponse(solicitud));
         }
 
         // ── PUT /api/solicitudes/{codigo}/cerrar ──────────────────────────────────
         @PutMapping("/{codigo}/cerrar")
-        @PreAuthorize("hasAnyRole('DIRECTIVO')")
+        @PreAuthorize("hasAnyRole('ESTUDIANTE')")
         @Operation(summary = "Cerrar una solicitud", description = "Finaliza el ciclo de vida de la solicitud. " +
                         "Precondición: solicitud en estado ATENDIDA.")
         @ApiResponse(responseCode = "200", description = "Solicitud cerrada exitosamente")
@@ -185,6 +185,23 @@ public class SolicitudController {
                         @Valid @RequestBody CerrarSolicitudRequest request) {
 
                 cerrarSolicitudUseCase.ejecutar(codigo, request.observacion());
+                Solicitud solicitud = obtenerSolicitudUseCase.ejecutar(codigo);
+                return ResponseEntity.ok(mapper.toDetalleResponse(solicitud));
+        }
+
+        // ── PUT /api/solicitudes/{codigo}/rechazar ────────────────────────────────
+        @PutMapping("/{codigo}/rechazar")
+        @PreAuthorize("hasAnyRole('ESTUDIANTE')")
+        @Operation(summary = "Rechazar atención de solicitud", description = "Devuelve la solicitud al estado EN_ATENCION. " +
+                        "Precondición: solicitud en estado ATENDIDA.")
+        @ApiResponse(responseCode = "200", description = "Atención rechazada exitosamente")
+        @ApiResponse(responseCode = "400", description = "Estado inválido o faltan datos")
+        @ApiResponse(responseCode = "404", description = "Solicitud no encontrada")
+        public ResponseEntity<SolicitudDetalleResponse> rechazarAtencion(
+                        @PathVariable String codigo,
+                        @Valid @RequestBody RechazarAtencionRequest request) {
+
+                rechazarAtencionUseCase.ejecutar(codigo, request.justificacion());
                 Solicitud solicitud = obtenerSolicitudUseCase.ejecutar(codigo);
                 return ResponseEntity.ok(mapper.toDetalleResponse(solicitud));
         }

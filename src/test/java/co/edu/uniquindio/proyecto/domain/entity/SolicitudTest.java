@@ -147,7 +147,7 @@ public class SolicitudTest {
                                 TipoDeSolicitud.REGISTRAR_ASIGNATURA);
                 solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
                 solicitud.asignarResponsable(responsable);
-                solicitud.atender();
+                solicitud.atender("Solicitud revisada y procesada");
                 assertEquals(EstadoDeSolicitud.ATENDIDA, solicitud.getEstado());
                 assertEquals(4, solicitud.getHistorial().size());
         }
@@ -160,7 +160,7 @@ public class SolicitudTest {
                                 solicitante,
                                 TipoDeSolicitud.REGISTRAR_ASIGNATURA);
                 Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
-                                solicitud::atender);
+                                () -> solicitud.atender("Observación de prueba"));
                 assertEquals("Solo se puede atender una solicitud en atencion", ex.getMessage());
         }
 
@@ -175,7 +175,7 @@ public class SolicitudTest {
                                 TipoDeSolicitud.REGISTRAR_ASIGNATURA);
                 solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
                 solicitud.asignarResponsable(responsable);
-                solicitud.atender();
+                solicitud.atender("Solicitud revisada y procesada");
                 solicitud.cerrar("Solicitud cerrada");
                 assertEquals(EstadoDeSolicitud.CERRADA, solicitud.getEstado());
                 assertEquals(5, solicitud.getHistorial().size());
@@ -191,5 +191,39 @@ public class SolicitudTest {
                 Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
                                 () -> solicitud.cerrar("Solicitud cerrada"));
                 assertEquals("Solo se puede cerrar una solicitud atendida", ex.getMessage());
+        }
+
+        @Test
+        void debeRechazarAtencionYVolverAEnAtencion() {
+                Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez",
+                                new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                solicitud.asignarResponsable(responsable);
+                solicitud.atender("Resuelto");
+                solicitud.rechazarAtencion("No me solucionaron el problema");
+                assertEquals(EstadoDeSolicitud.EN_ATENCION, solicitud.getEstado());
+                assertEquals(5, solicitud.getHistorial().size());
+        }
+
+        @Test
+        void noDebeRechazarAtencionSinJustificacion() {
+                Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez",
+                                new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
+                Solicitud solicitud = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                solicitud.asignarResponsable(responsable);
+                solicitud.atender("Resuelto");
+                Exception ex = assertThrows(ExcepcionDeReglaDeDominio.class,
+                                () -> solicitud.rechazarAtencion(""));
+                assertEquals("Debe proporcionar una justificación para rechazar la atención", ex.getMessage());
         }
 }

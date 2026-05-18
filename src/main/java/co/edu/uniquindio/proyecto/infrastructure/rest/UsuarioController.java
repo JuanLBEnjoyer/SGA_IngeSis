@@ -25,6 +25,7 @@ public class UsuarioController {
 
     private final RegistrarUsuarioUseCase registrarUsuarioUseCase;
     private final ObtenerUsuarioPorEmailUseCase obtenerUsuarioPorEmailUseCase;
+    private final co.edu.uniquindio.proyecto.application.usecase.ConsultarResponsablesUseCase consultarResponsablesUseCase;
     private final UsuarioMapper mapper;
 
     // POST: /api/usuarios
@@ -54,5 +55,16 @@ public class UsuarioController {
         String email = authentication.getName();
         Usuario usuario = obtenerUsuarioPorEmailUseCase.ejecutar(email);
         return ResponseEntity.ok(mapper.toUsuarioDetalle(usuario));
+    }
+
+    // GET: /api/usuarios/responsables
+
+    @GetMapping("/responsables")
+    @Operation(summary = "Obtener usuarios responsables", description = "Retorna la lista de docentes y directivos que pueden ser asignados.")
+    @ApiResponse(responseCode = "200", description = "Lista obtenida")
+    public ResponseEntity<java.util.List<co.edu.uniquindio.proyecto.application.dto.response.UsuarioResumenResponse>> obtenerResponsables() {
+        var responsables = consultarResponsablesUseCase.ejecutar();
+        var resumen = responsables.stream().map(mapper::toUsuarioResumen).toList();
+        return ResponseEntity.ok(resumen);
     }
 }
