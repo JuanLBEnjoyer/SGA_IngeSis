@@ -74,7 +74,8 @@ public class Solicitud {
         this.prioridad = prioridad;
         this.estado = EstadoDeSolicitud.CLASIFICADA;
         this.historial
-                .add(new RegistroHistorial("Solicitud clasificada" + justificacion, LocalDateTime.now(), this.estado));
+                .add(new RegistroHistorial("Solicitud clasificada: " + justificacion, LocalDateTime.now(),
+                        this.estado));
     }
 
     public void asignarResponsable(Usuario responsable) {
@@ -91,7 +92,8 @@ public class Solicitud {
             throw new ExcepcionDeReglaDeDominio("Solo se puede atender una solicitud en atencion");
         }
         this.estado = EstadoDeSolicitud.ATENDIDA;
-        String mensaje = observacion != null && !observacion.isBlank() ? "Solicitud atendida: " + observacion : "Solicitud atendida";
+        String mensaje = observacion != null && !observacion.isBlank() ? "Solicitud atendida: " + observacion
+                : "Solicitud atendida";
         this.historial.add(new RegistroHistorial(mensaje, LocalDateTime.now(), this.estado));
     }
 
@@ -100,7 +102,8 @@ public class Solicitud {
             throw new ExcepcionDeReglaDeDominio("Solo se puede cerrar una solicitud atendida");
         }
         this.estado = EstadoDeSolicitud.CERRADA;
-        String mensaje = justificacion != null && !justificacion.isBlank() ? "Solicitud cerrada: " + justificacion : "Solicitud cerrada";
+        String mensaje = justificacion != null && !justificacion.isBlank() ? "Solicitud cerrada: " + justificacion
+                : "Solicitud cerrada";
         this.historial
                 .add(new RegistroHistorial(mensaje, LocalDateTime.now(), this.estado));
     }
@@ -113,7 +116,8 @@ public class Solicitud {
             throw new ExcepcionDeReglaDeDominio("Debe proporcionar una justificación para rechazar la atención");
         }
         this.estado = EstadoDeSolicitud.EN_ATENCION;
-        this.historial.add(new RegistroHistorial("Atención rechazada por el estudiante: " + justificacion, LocalDateTime.now(), this.estado));
+        this.historial.add(new RegistroHistorial("Atención rechazada por el estudiante: " + justificacion,
+                LocalDateTime.now(), this.estado));
     }
 
 }

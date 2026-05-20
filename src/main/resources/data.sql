@@ -26,10 +26,10 @@ INSERT INTO solicitud_historial (solicitud_id, orden, descripcion, fecha, estado
 -- Historial de la solicitud 002 (CLASIFICADA)
 INSERT INTO solicitud_historial (solicitud_id, orden, descripcion, fecha, estado_asociado) VALUES
 (2, 0, 'Solicitud registrada',   CURRENT_TIMESTAMP, 'REGISTRADA'),
-(2, 1, 'Solicitud clasificadaInicio de semestre, se requiere con urgencia', CURRENT_TIMESTAMP, 'CLASIFICADA');
+(2, 1, 'Solicitud clasificada: Inicio de semestre, se requiere con urgencia', CURRENT_TIMESTAMP, 'CLASIFICADA');
 
 -- Historial de la solicitud 003 (EN_ATENCION)
 INSERT INTO solicitud_historial (solicitud_id, orden, descripcion, fecha, estado_asociado) VALUES
 (3, 0, 'Solicitud registrada',             CURRENT_TIMESTAMP, 'REGISTRADA'),
-(3, 1, 'Solicitud clasificadaDocumentacion completa y verificada', CURRENT_TIMESTAMP, 'CLASIFICADA'),
+(3, 1, 'Solicitud clasificada: Documentacion completa y verificada', CURRENT_TIMESTAMP, 'CLASIFICADA'),
 (3, 2, 'Solicitud asignada a responsable', CURRENT_TIMESTAMP, 'EN_ATENCION');
