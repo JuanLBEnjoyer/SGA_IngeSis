@@ -88,6 +88,33 @@ class CerrarSolicitudUseCaseTest {
         }
 
         @Test
+        void debeCerrarSolicitudConJustificacionNulaOBlanco() {
+                // Arrange
+                Solicitud solicitud1 = crearSolicitudAtendida();
+                Solicitud solicitud2 = crearSolicitudAtendida();
+                
+                when(solicitudRepository.obtenerPorCodigo(any(CodigoSolicitud.class)))
+                                .thenReturn(solicitud1)
+                                .thenReturn(solicitud2);
+
+                // Act - caso nulo
+                useCase.ejecutar("001", null);
+                // Assert
+                assertEquals(EstadoDeSolicitud.CERRADA, solicitud1.getEstado());
+                assertTrue(solicitud1.getHistorial().get(solicitud1.getHistorial().size() - 1).descripcion().equals("Solicitud cerrada"));
+
+                // Act - caso vacío/blanco
+                useCase.ejecutar("001", "   ");
+                // Assert
+                assertEquals(EstadoDeSolicitud.CERRADA, solicitud2.getEstado());
+                assertTrue(solicitud2.getHistorial().get(solicitud2.getHistorial().size() - 1).descripcion().equals("Solicitud cerrada"));
+
+                verify(solicitudRepository, times(2)).obtenerPorCodigo(any(CodigoSolicitud.class));
+                verify(solicitudRepository).guardar(solicitud1);
+                verify(solicitudRepository).guardar(solicitud2);
+        }
+
+        @Test
         void debeLanzarExcepcionCuandoSolicitudNoExiste() {
                 // Arrange
                 when(solicitudRepository.obtenerPorCodigo(any(CodigoSolicitud.class)))

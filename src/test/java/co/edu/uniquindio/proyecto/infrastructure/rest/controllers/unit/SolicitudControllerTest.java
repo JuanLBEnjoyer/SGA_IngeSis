@@ -53,7 +53,11 @@ class SolicitudControllerTest {
         @MockitoBean
         private SolicitudMapper mapper;
         @MockitoBean
+        private RechazarAtencionUseCase rechazarAtencionUseCase;
+        @MockitoBean
         private JwtDecoder jwtDecoder;
+        @MockitoBean
+        private org.springframework.security.authentication.AuthenticationProvider authenticationProvider;
         // ── Fixtures ──────────────────────────────────────────────────────────────
         private SolicitudDetalleResponse detalleResponseMock() {
                 return new SolicitudDetalleResponse(
@@ -370,7 +374,11 @@ class SolicitudControllerTest {
 
         @Test
         @WithMockUser(roles = "DIRECTIVO")
-        void debeRetornar400CuandoObservacionEstaVaciaAlCerrar() throws Exception {
+        void debeCerrarSolicitudConObservacionVacia() throws Exception {
+                Solicitud solicitudMock = mock(Solicitud.class);
+                when(obtenerSolicitudUseCase.ejecutar("001")).thenReturn(solicitudMock);
+                when(mapper.toDetalleResponse(solicitudMock)).thenReturn(detalleResponseMock());
+
                 String body = """
                                 {
                                   "observacion": ""
@@ -380,10 +388,26 @@ class SolicitudControllerTest {
                 mockMvc.perform(put("/api/solicitudes/001/cerrar")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(body))
-                                .andExpect(status().isBadRequest())
-                                .andExpect(jsonPath("$.errores.observacion").exists());
+                                .andExpect(status().isOk());
 
-                verifyNoInteractions(cerrarSolicitudUseCase);
+                verify(cerrarSolicitudUseCase).ejecutar(eq("001"), eq(""));
+        }
+
+        @Test
+        @WithMockUser(roles = "DIRECTIVO")
+        void debeCerrarSolicitudOmitiendoObservacion() throws Exception {
+                Solicitud solicitudMock = mock(Solicitud.class);
+                when(obtenerSolicitudUseCase.ejecutar("001")).thenReturn(solicitudMock);
+                when(mapper.toDetalleResponse(solicitudMock)).thenReturn(detalleResponseMock());
+
+                String body = "{}";
+
+                mockMvc.perform(put("/api/solicitudes/001/cerrar")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body))
+                                .andExpect(status().isOk());
+
+                verify(cerrarSolicitudUseCase).ejecutar(eq("001"), isNull());
         }
 
         // ── GET /api/solicitudes/{codigo}/historial ───────────────────────────────

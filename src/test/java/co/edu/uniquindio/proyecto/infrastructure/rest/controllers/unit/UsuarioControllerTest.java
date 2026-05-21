@@ -42,7 +42,13 @@ class UsuarioControllerTest {
         private UsuarioMapper mapper;
 
         @MockitoBean
+        private co.edu.uniquindio.proyecto.application.usecase.ConsultarResponsablesUseCase consultarResponsablesUseCase;
+
+        @MockitoBean
         private JwtDecoder jwtDecoder;
+
+        @MockitoBean
+        private org.springframework.security.authentication.AuthenticationProvider authenticationProvider;
 
         @Test
         void debeRegistrarUsuarioExitosamente() throws Exception {

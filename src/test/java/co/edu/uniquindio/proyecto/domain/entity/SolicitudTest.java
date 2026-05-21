@@ -182,6 +182,38 @@ public class SolicitudTest {
         }
 
         @Test
+        void debeCerrarSolicitudConJustificacionVaciaONula() {
+                Usuario responsable = new Usuario(new Documento("789456", TipoDeDocumento.CEDULA), "Ana Gomez",
+                                new Email("ana.gomez@uqvirtual.edu.co"), RolUsuario.ADMINISTRATIVO);
+                
+                // Caso nulo
+                Solicitud solicitud1 = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud1.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                solicitud1.asignarResponsable(responsable);
+                solicitud1.atender("Solicitud revisada y procesada");
+                solicitud1.cerrar(null);
+                assertEquals(EstadoDeSolicitud.CERRADA, solicitud1.getEstado());
+                assertEquals("Solicitud cerrada", solicitud1.getHistorial().get(4).descripcion());
+
+                // Caso vacío
+                Solicitud solicitud2 = new Solicitud(
+                                codigo,
+                                "Registro de materias",
+                                solicitante,
+                                TipoDeSolicitud.REGISTRAR_ASIGNATURA);
+                solicitud2.clasificar(PrioridadDeSolicitud.MEDIO, "Falta de cupo");
+                solicitud2.asignarResponsable(responsable);
+                solicitud2.atender("Solicitud revisada y procesada");
+                solicitud2.cerrar("   ");
+                assertEquals(EstadoDeSolicitud.CERRADA, solicitud2.getEstado());
+                assertEquals("Solicitud cerrada", solicitud2.getHistorial().get(4).descripcion());
+        }
+
+        @Test
         void noDebeCerrarSolicitudSiNoEstaAtendida() {
                 Solicitud solicitud = new Solicitud(
                                 codigo,
